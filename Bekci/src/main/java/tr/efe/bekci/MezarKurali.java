@@ -20,4 +20,14 @@ public final class MezarKurali {
     public static boolean uyarmali(long olusma, long simdi, long omurMs, boolean uyarildi) {
         return !uyarildi && omurMs - (simdi - olusma) <= 3_600_000L;
     }
+
+    /**
+     * Mezara girecek XP. Vanilla ölünce en fazla 100 XP düşürür (seviye×7, ≈7. seviye);
+     * mezar oyuncunun toplam XP'sinin "oran" yüzdesini saklar, vanilladan az olmaz.
+     */
+    public static int mezarXp(int toplamXp, int vanillaDusen, int oranYuzde, boolean seviyeKorunuyor) {
+        if (seviyeKorunuyor) return 0;
+        long oranli = (long) Math.max(0, toplamXp) * Math.max(0, Math.min(100, oranYuzde)) / 100;
+        return (int) Math.max(Math.max(0, vanillaDusen), oranli);
+    }
 }

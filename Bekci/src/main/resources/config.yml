@@ -17,5 +17,7 @@ mezar:
   herkese-acik-dk: 30
   # Bu kadar saat sonra mezar ve içindekiler silinir
   silinme-saat: 24
+  # Ölenin XP'sinin yüzde kaçı mezara girsin (100 = hepsi; vanilla ölümde en fazla ~7 seviye kalırdı)
+  xp-orani: 100
   # Mezarın etrafında ruh parçacıkları
   parcacik: true

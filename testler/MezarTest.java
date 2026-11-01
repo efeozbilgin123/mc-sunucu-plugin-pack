@@ -17,5 +17,10 @@ public class MezarTest {
         Dogrula.dogru(!MezarKurali.uyarmali(0, gun - 3_600_000L, gun, true), "bir kez uyar");
         Dogrula.dogru(!MezarKurali.uyarmali(0, gun - 3_600_001L, gun, false), "1 saatten fazla var");
         Dogrula.dogru(MezarKurali.acabilir(Y, false, true, A, K, 0, 1, dk30), "op her mezarı açar");
+        // XP: vanilla en fazla 100 XP (≈7. seviye) bırakır; mezar oyuncunun toplam XP'sini saklar
+        Dogrula.esit(1395, MezarKurali.mezarXp(1395, 100, 100, false), "30. seviye: XP'nin hepsi mezara");
+        Dogrula.esit(697, MezarKurali.mezarXp(1395, 100, 50, false), "oran %50 ise yarısı");
+        Dogrula.esit(100, MezarKurali.mezarXp(1395, 100, 0, false), "oran 0 ise vanilla kadar");
+        Dogrula.esit(0, MezarKurali.mezarXp(1395, 100, 100, true), "seviye korunuyorsa mezara XP girmez");
     }
 }

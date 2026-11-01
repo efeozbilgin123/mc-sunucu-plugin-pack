@@ -135,7 +135,8 @@ public final class Mezar implements Listener, CommandExecutor, TabCompleter {
         Player p = e.getEntity();
         List<ItemStack> dusen = new ArrayList<>();
         for (ItemStack is : e.getDrops()) if (is != null && is.getType() != Material.AIR) dusen.add(is.clone());
-        int xp = e.getDroppedExp();
+        int xp = MezarKurali.mezarXp(p.calculateTotalExperiencePoints(), e.getDroppedExp(),
+                plugin.getConfig().getInt("mezar.xp-orani", 100), e.getKeepLevel());
         if (dusen.isEmpty() && xp <= 0) return;
         Block b = yerBul(p);
         if (b == null) return; // uygun yer yok: vanilla gibi yere düşsün
