@@ -22,9 +22,9 @@ public class IdamTest {
         Dogrula.esit("oyunda", IdamKurali.cevrimdisiHata(true, true), "oyundaki oyuncu: normal idam kullanılır");
         Dogrula.esit(null, IdamKurali.cevrimdisiHata(true, false), "oyunda olmayan bilinen oyuncu");
         // Sahne zaman çizelgesi (oyuncu ve manken sahnesi aynı)
-        Dogrula.esit(0.0, IdamKurali.yukseklik(0), "geri sayımda yerde");
-        Dogrula.esit(0.0, IdamKurali.yukseklik(99), "geri sayım bitmeden yerde");
-        Dogrula.esit(170, IdamKurali.SAHNE_SON, "sahne 8,5 saniye (asılı kalma 3,5 sn)");
+        Dogrula.esit(IdamKurali.SEHPA_YUKSEKLIK, IdamKurali.yukseklik(0), "geri sayımda sehpanın üstünde");
+        Dogrula.esit(IdamKurali.SEHPA_YUKSEKLIK, IdamKurali.yukseklik(99), "geri sayım bitmeden sehpada");
+        Dogrula.esit(200, IdamKurali.SAHNE_SON, "sahne 10 saniye (asılı kalma 5 sn)");
         // Gıyabi idam: op'un başının üstündeki darağacı çiti (dy: ayaktan yukarı blok)
         Dogrula.esit(4, IdamKurali.ustteCit(dy -> dy == 4, dy -> dy < 4, 6), "4 blok yukarıdaki çit bulunur");
         Dogrula.esit(-1, IdamKurali.ustteCit(dy -> false, dy -> true, 6), "üstte çit yok");
@@ -32,18 +32,35 @@ public class IdamTest {
         Dogrula.esit(-1, IdamKurali.ustteCit(dy -> dy == 8, dy -> true, 6), "çok yukarıdaki sayılmaz");
         Dogrula.esit("Efe", IdamKurali.testHedefi(new String[]{"test"}, "Efe"), "isim yazılmazsa kendi görünümü");
         Dogrula.esit("Ahmet", IdamKurali.testHedefi(new String[]{"test", "Ahmet"}, "Efe"), "yazılan oyuncunun görünümü");
-        // Asılma: geri sayım bitince ip bir anda çeker (yavaş yükselme değil), ayaklar yerden kesilir, sönümlü sallanır
-        Dogrula.dogru(IdamKurali.yukseklik(102) > 1.25, "3 tick içinde çekilip biraz fırlar");
-        Dogrula.esit(IdamKurali.ASILI_YUKSEKLIK, IdamKurali.yukseklik(130), "asılı kalır (ayaklar yerden 1,25 blok)");
-        Dogrula.dogru(IdamKurali.yukseklik(101) > 0.4, "çekilme hızlı (ilk tick'lerde)");
-        Dogrula.esit(0f, IdamKurali.salinim(100), "çekildiği an sallanma başlamaz");
-        Dogrula.dogru(Math.abs(IdamKurali.salinim(110)) > Math.abs(IdamKurali.salinim(150)) || Math.abs(IdamKurali.salinim(150)) < 3f,
-                "sallanma giderek azalır");
-        Dogrula.dogru(Math.abs(IdamKurali.salinimKayma(112)) <= 0.15 && IdamKurali.salinimKayma(99) == 0,
-                "gövde de sarkaç gibi hafif kayar (en fazla 0,15 blok)");
+        // Asılma: sehpa devrilir, mahkum yukarıdan aşağı düşer, ip gerilince hafif esner, sonra sallanır
+        Dogrula.dogru(IdamKurali.SEHPA_YUKSEKLIK + 1.8 < 3, "sehpadayken başı çite değmez (3 blok boşluk)");
+        for (int t = 100; t < 104; t++) {
+            Dogrula.dogru(IdamKurali.yukseklik(t + 1) < IdamKurali.yukseklik(t), "düşerken hep aşağı iner (t=" + t + ")");
+        }
+        Dogrula.dogru(IdamKurali.yukseklik(105) < IdamKurali.ASILI_YUKSEKLIK, "ip gerilince hafif esner");
+        Dogrula.esit(IdamKurali.ASILI_YUKSEKLIK, IdamKurali.yukseklik(150), "sonra asılı kalır");
+        double enAz = 9, enCok = 0;
+        for (int t = 0; t <= IdamKurali.SAHNE_SON; t++) {
+            enAz = Math.min(enAz, IdamKurali.yukseklik(t));
+            if (t >= 101) enCok = Math.max(enCok, IdamKurali.yukseklik(t));
+        }
+        Dogrula.dogru(enAz > 0.25, "ayaklar hiç yere değmez");
+        Dogrula.dogru(enCok < IdamKurali.SEHPA_YUKSEKLIK, "düştükten sonra hiç yukarı fırlamaz");
+        Dogrula.esit(0f, IdamKurali.salinim(100), "düşerken dönme başlamaz");
+        Dogrula.dogru(Math.abs(IdamKurali.salinim(130)) > 0.5, "sonra döner");
+        Dogrula.dogru(Math.abs(IdamKurali.salinimKayma(103)) == 0 && IdamKurali.salinimKayma(99) == 0, "ip gerilmeden sarkaç yok");
+        double enBuyuk = 0;
+        for (int t = 104; t <= IdamKurali.SAHNE_SON; t++) enBuyuk = Math.max(enBuyuk, Math.abs(IdamKurali.salinimKayma(t)));
+        Dogrula.dogru(enBuyuk > 0.1 && enBuyuk <= 0.25, "sarkaç gibi ileri geri sallanır (en fazla 0,25 blok)");
+        Dogrula.dogru(Math.abs(IdamKurali.salinimKayma(190)) < enBuyuk, "sallanma giderek azalır");
+        // Sehpa: geri sayımda dik, 100'de tekmelenip hızlanarak devrilir, yan yatar
+        Dogrula.esit(0f, IdamKurali.sehpaAcisi(99), "geri sayımda sehpa dik");
+        Dogrula.dogru(IdamKurali.sehpaAcisi(100) > 0 && IdamKurali.sehpaAcisi(100) < IdamKurali.sehpaAcisi(102), "devrilmeye başlar");
+        Dogrula.esit(90f, IdamKurali.sehpaAcisi(104), "yan yatar");
+        Dogrula.esit(90f, IdamKurali.sehpaAcisi(150), "yatık kalır");
         // Asılıyken kamera serbest: yalnızca çekiliş anında ya da yerinden oynatılınca ışınlanır
         Dogrula.dogru(IdamKurali.isinlaGerekli(0, 0), "sahne başında yerine konur");
-        Dogrula.dogru(IdamKurali.isinlaGerekli(103, 0), "ip çekilirken ışınlanarak yükselir");
+        Dogrula.dogru(IdamKurali.isinlaGerekli(103, 0), "düşerken ışınlanarak iner");
         Dogrula.dogru(!IdamKurali.isinlaGerekli(50, 0.1), "beklerken her tick ışınlanmaz (bakış kilitlenmesin)");
         Dogrula.dogru(!IdamKurali.isinlaGerekli(130, 0.2), "sallanırken her tick ışınlanmaz");
         Dogrula.dogru(IdamKurali.isinlaGerekli(130, 0.5), "itilip yerinden oynarsa geri konur");

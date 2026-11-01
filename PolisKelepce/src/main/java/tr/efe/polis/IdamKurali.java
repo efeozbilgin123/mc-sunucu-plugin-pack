@@ -34,35 +34,57 @@ public final class IdamKurali {
     }
 
     /**
-     * Sahne: 0-99 geri sayım (ayakta), 100'de ip bir anda çeker (3 tick, biraz fırlar, sonra oturur),
-     * sonra asılı halde sönümlü sallanma; SAHNE_SON'da biter.
+     * Sahne: 0-99 geri sayım (sehpanın üstünde), 100'de sehpa tekmelenip devrilir, mahkum
+     * yukarıdan aşağı düşer, ip gerilince hafif esner, sonra sarkaç gibi sallanıp yavaşça döner;
+     * SAHNE_SON'da biter.
      */
-    public static final int SAHNE_SON = 170;
-    /** Asılıyken ayakların yerden yüksekliği (blok): çitin altında 3 blok boşlukta boyun çite dayanır. */
-    public static final double ASILI_YUKSEKLIK = 1.25;
+    public static final int SAHNE_SON = 200;
+    /** Sehpanın yüksekliği = geri sayımda ayakların yerden yüksekliği (blok). */
+    public static final double SEHPA_YUKSEKLIK = 1.0;
+    /** Asılıyken ayakların yerden yüksekliği (blok). */
+    public static final double ASILI_YUKSEKLIK = 0.4;
+    /** Düşüş kaç tick sürer (Minecraft yerçekimine yakın). */
+    public static final int DUSUS_TIK = 4;
+    private static final double[] ESNEME = {-0.09, -0.04, 0.02, 0.01};
 
-    /** Tick'e göre yerden yükseklik. */
+    /** Tick'e göre ayakların yerden yüksekliği. */
     public static double yukseklik(int t) {
-        if (t < 100) return 0;
+        if (t < 100) return SEHPA_YUKSEKLIK;
         int d = t - 100;
-        double tepe = ASILI_YUKSEKLIK + 0.1;
-        if (d <= 2) return tepe * (d + 1) / 3.0;           // hızlı çekiş
-        if (d < 8) return tepe - 0.1 * (d - 2) / 6.0;      // ipin esnemesi: hafifçe geri oturur
+        if (d <= DUSUS_TIK) {
+            double k = (double) d / DUSUS_TIK;
+            return SEHPA_YUKSEKLIK - (SEHPA_YUKSEKLIK - ASILI_YUKSEKLIK) * k * k; // serbest düşüş: hızlanarak
+        }
+        int e = d - DUSUS_TIK - 1;
+        if (e < ESNEME.length) return ASILI_YUKSEKLIK + ESNEME[e]; // ip gerilir, hafif esneyip oturur
         return ASILI_YUKSEKLIK;
     }
 
-    /** Asılıyken gövdenin dönmesi (derece): çekildiği an 0, sonra azalarak sallanır. */
+    /** Sallanma ip gerildiği an başlar. */
+    public static final int SALINIM_BASLA = 100 + DUSUS_TIK;
+
+    /** Asılıyken gövdenin kendi etrafında yavaşça dönmesi (derece). */
     public static float salinim(int t) {
-        if (t <= 100) return 0f;
-        double d = t - 100;
-        return (float) (14 * Math.exp(-d / 45.0) * Math.sin(d * 0.22));
+        if (t <= SALINIM_BASLA) return 0f;
+        double d = t - SALINIM_BASLA;
+        return (float) (22 * Math.exp(-d / 90.0) * Math.sin(d * 0.07));
     }
 
-    /** Sarkaç gibi yana kayma (blok, bakış yönüne dik): en fazla 0,15. */
+    /**
+     * Sarkaç gibi ileri-geri kayma (blok, bakış yönünde): ~1,2 blok ipte bir gidip gelme ≈ 2,2 sn,
+     * sehpa öne tekmelendiği için öne doğru başlar, giderek azalır.
+     */
     public static double salinimKayma(int t) {
-        if (t <= 100) return 0;
-        double d = t - 100;
-        return 0.15 * Math.exp(-d / 50.0) * Math.sin(d * 0.22 + Math.PI / 2) * Math.min(1.0, d / 4.0);
+        if (t <= SALINIM_BASLA) return 0;
+        double d = t - SALINIM_BASLA;
+        return 0.22 * Math.exp(-d / 80.0) * Math.sin(d * 0.143);
+    }
+
+    /** Sehpanın devrilme açısı (derece, 0 = dik, 90 = yan yatmış); bu tick'te varılacak açı. */
+    public static float sehpaAcisi(int t) {
+        if (t < 100) return 0f;
+        double k = Math.min(1.0, (t - 100 + 2) / 6.0);
+        return (float) (90 * k * k);
     }
 
     /**
@@ -82,8 +104,8 @@ public final class IdamKurali {
         return args.length > 1 && !args[1].isBlank() ? args[1] : kendiIsim;
     }
 
-    /** Çekiliş sırasında (yükseklik değişirken) bu tick'e kadar. */
-    public static final int CEKILIS_SON = 108;
+    /** Düşüş ve esneme sırasında (yükseklik değişirken) bu tick'e kadar. */
+    public static final int CEKILIS_SON = 100 + DUSUS_TIK + 4;
 
     /**
      * Asılı oyuncuyu bu tick ışınlamak gerekiyor mu? Her tick ışınlamak kamerayı kilitler;

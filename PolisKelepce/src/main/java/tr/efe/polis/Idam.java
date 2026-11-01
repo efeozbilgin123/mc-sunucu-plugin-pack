@@ -15,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.LeashHitch;
 import org.bukkit.entity.Mannequin;
@@ -62,6 +63,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         Location cit;
         Chicken ip;
         LeashHitch dugum;
+        List<BlockDisplay> sehpa;
         int tick;
         BukkitTask gorev;
         Onay onay;
@@ -337,7 +339,8 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
             m.customName(Component.text(isim, NamedTextColor.GRAY));
             m.setCustomNameVisible(true);
         });
-        Object[] ip = ipKur(cit, taban.clone().add(0, 1.45, 0));
+        List<BlockDisplay> sehpa = sehpaKur(taban, yaw);
+        Object[] ip = ipKur(cit, taban.clone().add(0, IdamKurali.SEHPA_YUKSEKLIK + 1.45, 0));
         Chicken tavuk = (Chicken) ip[0];
         LeashHitch dugum = (LeashHitch) ip[1];
         boolean efekt = plugin.getConfig().getBoolean("gorsel.idam-efekt", true);
@@ -350,6 +353,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
                 if (efekt) cit.getWorld().spawnParticle(Particle.LARGE_SMOKE, manken.getLocation().add(0, 1.4, 0), 30, 0.3, 0.4, 0.3, 0.02);
                 manken.remove();
                 tavuk.remove();
+                sehpaKaldir(sehpa);
                 if (dugum != null) dugum.remove();
                 bolge.removePluginChunkTicket(plugin);
                 if (!test) Bukkit.broadcast(Component.text(isim + " gıyabında idam edildi.", NamedTextColor.GRAY));
@@ -371,16 +375,17 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
                     }
                 }
             }
-            if (efekt && t == 120) cit.getWorld().playSound(taban, Sound.BLOCK_CHAIN_PLACE, 1.5f, 0.6f);
+            sehpaAdim(sehpa, taban, t, efekt);
+            if (efekt && t == IdamKurali.SALINIM_BASLA) cit.getWorld().playSound(taban, Sound.BLOCK_CHAIN_PLACE, 1.5f, 0.6f);
         }, 1L, 1L);
     }
 
     /** Gıyabında idam edilen geri geldi: giriş yapınca (AuthMe) ölür. */
-    /** Asılıyken çift boşlukla uçuşu kapatıp düşmesin. */
+    /** Sehpada / ipteyken çift boşlukla uçuşu kapatıp düşmesin. */
     @org.bukkit.event.EventHandler
     public void onUcus(org.bukkit.event.player.PlayerToggleFlightEvent e) {
         Sahne sh = sahneler.get(e.getPlayer().getUniqueId());
-        if (!e.isFlying() && sh != null && sh.tick > 100) e.setCancelled(true);
+        if (!e.isFlying() && sh != null) e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -525,10 +530,15 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         // (Her tick ışınlamak kamerayı tek yöne kilitliyordu.)
         mahkum.setAllowFlight(true);
         mahkum.setFlySpeed(0f);
-        mahkum.teleport(sh.taban);
+        Location sehpaUstu = sh.taban.clone().add(0, IdamKurali.SEHPA_YUKSEKLIK, 0);
+        sehpaUstu.setYaw(mahkum.getLocation().getYaw());
+        sehpaUstu.setPitch(mahkum.getLocation().getPitch());
+        mahkum.teleport(sehpaUstu);
+        mahkum.setFlying(true);
 
         // Çitten boyna ip: görünmez yaratık + kayış düğümü
-        Object[] ip = ipKur(cit, sh.taban.clone().add(0, 1.45, 0));
+        sh.sehpa = sehpaKur(sh.taban, sh.yaw);
+        Object[] ip = ipKur(cit, sh.taban.clone().add(0, IdamKurali.SEHPA_YUKSEKLIK + 1.45, 0));
         sh.ip = (Chicken) ip[0];
         sh.dugum = (LeashHitch) ip[1];
         if (polis.getGameMode() != org.bukkit.GameMode.CREATIVE) {
@@ -562,11 +572,11 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
             yer.setYaw(simdi.getYaw());
             yer.setPitch(simdi.getPitch());
             mahkum.teleport(yer);
-            if (t >= 100 && !mahkum.isFlying()) mahkum.setFlying(true); // yerden kesildi: havada asılı kalsın
+            if (!mahkum.isFlying()) mahkum.setFlying(true); // sehpada da, ipte de havada tutulur (yerçekimi yok)
         } else {
             // Sarkaç: hızla it (hız paketi kameraya dokunmaz)
             double r = Math.toRadians(sh.yaw), v = IdamKurali.kaymaHizi(t);
-            mahkum.setVelocity(new org.bukkit.util.Vector(Math.cos(r) * v, 0, Math.sin(r) * v));
+            mahkum.setVelocity(new org.bukkit.util.Vector(-Math.sin(r) * v, 0, Math.cos(r) * v));
         }
         if (sh.ip != null) sh.ip.teleport(yer.clone().add(0, 1.45, 0));
         if (sh.dugum == null && t % 2 == 0) ipCiz(sh.cit.clone().add(0.5, 0.5, 0.5), yer.clone().add(0, 1.45, 0));
@@ -582,8 +592,73 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
                 }
             }
         }
-        if (efekt && t == 120) mahkum.getWorld().playSound(mahkum.getLocation(), Sound.BLOCK_CHAIN_PLACE, 1.5f, 0.6f);
+        sehpaAdim(sh.sehpa, sh.taban, t, efekt);
+        if (efekt && t == IdamKurali.SALINIM_BASLA) mahkum.getWorld().playSound(mahkum.getLocation(), Sound.BLOCK_CHAIN_PLACE, 1.5f, 0.6f);
         if (t >= IdamKurali.SAHNE_SON) bitir(sh, mahkum, polis.getName(), true);
+    }
+
+    // ------------------------------------------------------------------
+    // Sehpa: blok görüntülerinden tabure (oturak + 4 ayak). Çarpışması yok; mahkum uçuş
+    // hızı 0 ile havada tutulur. Devrilirken hepsi öndeki alt kenar etrafında döner.
+    // ------------------------------------------------------------------
+
+    /** {x, y, z, enX, boyY, enZ}: öndeki alt kenara (dönme ekseni) göre; z öne doğru, tabure z ∈ [-0.7, 0]. */
+    private static final float[][] SEHPA_PARCA = {
+            {-0.35f, 0.85f, -0.70f, 0.70f, 0.15f, 0.70f}, // oturak
+            {-0.33f, 0f, -0.68f, 0.10f, 0.85f, 0.10f},
+            {0.23f, 0f, -0.68f, 0.10f, 0.85f, 0.10f},
+            {-0.33f, 0f, -0.12f, 0.10f, 0.85f, 0.10f},
+            {0.23f, 0f, -0.12f, 0.10f, 0.85f, 0.10f},
+    };
+
+    private static List<BlockDisplay> sehpaKur(Location taban, float yaw) {
+        double r = Math.toRadians(yaw);
+        // Dönme ekseni mahkumun önünde: sehpa tekmelenince öne devrilir
+        Location eksen = taban.clone().add(-Math.sin(r) * 0.35, 0, Math.cos(r) * 0.35);
+        eksen.setYaw(yaw);
+        eksen.setPitch(0);
+        List<BlockDisplay> liste = new ArrayList<>();
+        for (int i = 0; i < SEHPA_PARCA.length; i++) {
+            float[] p = SEHPA_PARCA[i];
+            org.bukkit.Material m = i == 0 ? org.bukkit.Material.SPRUCE_PLANKS : org.bukkit.Material.STRIPPED_SPRUCE_LOG;
+            liste.add(taban.getWorld().spawn(eksen, BlockDisplay.class, d -> {
+                d.setBlock(m.createBlockData());
+                d.setPersistent(false);
+                d.setTransformation(sehpaDonusumu(p, 0f));
+            }));
+        }
+        return liste;
+    }
+
+    /** Parçanın, eksen etrafında "aci" derece öne yatmış (ve öne kaymış) hali: ötele = R·ofset, döndür = R. */
+    private static org.bukkit.util.Transformation sehpaDonusumu(float[] p, float aci) {
+        float a = (float) Math.toRadians(aci);
+        float cos = (float) Math.cos(a), sin = (float) Math.sin(a);
+        float y = p[1] * cos - p[2] * sin;
+        float z = p[1] * sin + p[2] * cos + 0.4f * aci / 90f; // tekmeyle biraz da öne kayar: sallanan ayaklar çarpmasın
+        return new org.bukkit.util.Transformation(new org.joml.Vector3f(p[0], y, z), new org.joml.AxisAngle4f(a, 1, 0, 0),
+                new org.joml.Vector3f(p[3], p[4], p[5]), new org.joml.AxisAngle4f());
+    }
+
+    /** 100'de tekmelenir; 2 tick'te bir yeni açıya yumuşakça (istemci ara kareleri çizer) devrilir. */
+    private static void sehpaAdim(List<BlockDisplay> sehpa, Location taban, int t, boolean efekt) {
+        if (sehpa == null || t < 100 || t > 104 || (t - 100) % 2 != 0) return;
+        float aci = IdamKurali.sehpaAcisi(t);
+        for (int i = 0; i < sehpa.size(); i++) {
+            BlockDisplay d = sehpa.get(i);
+            if (!d.isValid()) continue;
+            d.setInterpolationDelay(0);
+            d.setInterpolationDuration(2);
+            d.setTransformation(sehpaDonusumu(SEHPA_PARCA[i], aci));
+        }
+        if (!efekt) return;
+        if (t == 100) taban.getWorld().playSound(taban, Sound.ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR, 1.2f, 1.3f);
+        if (t == 104) taban.getWorld().playSound(taban, Sound.BLOCK_WOOD_FALL, 1.5f, 0.8f);
+    }
+
+    private static void sehpaKaldir(List<BlockDisplay> sehpa) {
+        if (sehpa == null) return;
+        for (BlockDisplay d : sehpa) d.remove();
     }
 
     /** Çitten boyna ip: {görünmez tavuk, kayış düğümü (kurulamazsa null: ip parçacıkla çizilir)} */
@@ -618,11 +693,11 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         }
     }
 
-    /** Sahnede gövdenin yeri: ip çekince yükselir, sarkaç gibi yana kayar ve döner. */
+    /** Sahnede gövdenin yeri: sehpada durur, devrilince düşer, sarkaç gibi ileri-geri sallanır ve döner. */
     private static Location asiliYer(Location taban, float yaw, int t) {
         double r = Math.toRadians(yaw);
         double kayma = IdamKurali.salinimKayma(t);
-        Location yer = taban.clone().add(Math.cos(r) * kayma, IdamKurali.yukseklik(t), Math.sin(r) * kayma);
+        Location yer = taban.clone().add(-Math.sin(r) * kayma, IdamKurali.yukseklik(t), Math.cos(r) * kayma);
         yer.setYaw(yaw + IdamKurali.salinim(t));
         return yer;
     }
@@ -643,6 +718,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
             sh.ip.remove();
         }
         if (sh.dugum != null) sh.dugum.remove();
+        sehpaKaldir(sh.sehpa);
         sahneler.remove(sh.mahkum);
     }
 
