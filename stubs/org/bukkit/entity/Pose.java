@@ -1,0 +1,1 @@
+package org.bukkit.entity; public enum Pose { STANDING, SWIMMING }

@@ -1,0 +1,1 @@
+package org.bukkit.event.block; import org.bukkit.block.Block; import org.bukkit.entity.Entity; public class CauldronLevelChangeEvent extends org.bukkit.event.Event { public Block getBlock(){return null;} public Entity getEntity(){return null;} public int getOldLevel(){return 0;} public int getNewLevel(){return 0;} public void setCancelled(boolean c){} }

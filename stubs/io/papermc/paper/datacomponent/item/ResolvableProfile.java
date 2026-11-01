@@ -1,0 +1,1 @@
+package io.papermc.paper.datacomponent.item; public interface ResolvableProfile { static Builder resolvableProfile(){return null;} interface Builder { Builder name(String n); Builder uuid(java.util.UUID u); Builder addProperty(com.destroystokyo.paper.profile.ProfileProperty p); ResolvableProfile build(); } }

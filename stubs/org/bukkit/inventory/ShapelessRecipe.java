@@ -1,0 +1,1 @@
+package org.bukkit.inventory; import org.bukkit.*; public class ShapelessRecipe implements Recipe, Keyed { public ShapelessRecipe(NamespacedKey k, ItemStack r){} public ShapelessRecipe addIngredient(RecipeChoice c){return this;} public ShapelessRecipe addIngredient(Material m){return this;} public ItemStack getResult(){return null;} public NamespacedKey getKey(){return null;} }

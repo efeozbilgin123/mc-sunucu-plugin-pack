@@ -1,0 +1,1 @@
+package org.bukkit.inventory; import org.bukkit.*; public class ShapedRecipe implements Recipe, Keyed { public ShapedRecipe(NamespacedKey k, ItemStack r){} public ShapedRecipe shape(String... s){return this;} public ShapedRecipe setIngredient(char c, Material m){return this;} public ItemStack getResult(){return null;} public NamespacedKey getKey(){return null;} }

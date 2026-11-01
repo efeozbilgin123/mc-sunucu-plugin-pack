@@ -1,0 +1,1 @@
+package org.bukkit.event.entity; import org.bukkit.entity.Item; public class ItemDespawnEvent extends org.bukkit.event.Event { public Item getEntity(){return null;} public void setCancelled(boolean c){} }

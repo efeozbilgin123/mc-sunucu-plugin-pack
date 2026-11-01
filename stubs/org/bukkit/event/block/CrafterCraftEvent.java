@@ -1,0 +1,1 @@
+package org.bukkit.event.block; import org.bukkit.block.Block; import org.bukkit.inventory.Recipe; public class CrafterCraftEvent extends org.bukkit.event.Event { public Recipe getRecipe(){return null;} public Block getBlock(){return null;} public void setCancelled(boolean c){} }

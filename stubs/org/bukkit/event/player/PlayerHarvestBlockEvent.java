@@ -1,0 +1,1 @@
+package org.bukkit.event.player; import org.bukkit.block.Block; import org.bukkit.inventory.ItemStack; import java.util.List; public class PlayerHarvestBlockEvent extends org.bukkit.event.Event { public Block getHarvestedBlock(){return null;} public List<ItemStack> getItemsHarvested(){return null;} }

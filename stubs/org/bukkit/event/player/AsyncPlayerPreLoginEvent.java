@@ -1,0 +1,1 @@
+package org.bukkit.event.player; import java.util.UUID; public class AsyncPlayerPreLoginEvent extends org.bukkit.event.Event { public enum Result { ALLOWED, KICK_BANNED } public UUID getUniqueId(){return null;} public void disallow(Result r, net.kyori.adventure.text.Component m){} }

@@ -1,0 +1,1 @@
+package org.bukkit.event.inventory; import org.bukkit.inventory.*; public class InventoryDragEvent extends org.bukkit.event.Event { public InventoryView getView(){return null;} public void setCancelled(boolean c){} public ItemStack getOldCursor(){return null;} public org.bukkit.entity.HumanEntity getWhoClicked(){return null;} }

@@ -1,0 +1,1 @@
+package org.bukkit.entity; public interface ArmorStand extends LivingEntity { void setMarker(boolean m); void setSmall(boolean s); }

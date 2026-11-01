@@ -1,0 +1,1 @@
+package net.kyori.adventure.title; import net.kyori.adventure.text.Component; public interface Title { interface Times { static Times times(java.time.Duration a, java.time.Duration b, java.time.Duration c){return null;} } static Title title(Component a, Component b, Times t){return null;} }

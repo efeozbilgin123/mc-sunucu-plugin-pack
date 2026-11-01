@@ -1,0 +1,21 @@
+name: Bekci
+version: 1.0.1
+main: tr.efe.bekci.BekciPlugin
+api-version: '1.21'
+author: Efe
+description: Blok ve sandık kaydı, inceleme, geri alma, sandık bulucu ve mezar.
+libraries:
+  - org.xerial:sqlite-jdbc:3.53.4.0
+
+commands:
+  bekci:
+    description: (Op) Kayıt inceleme, geri alma, sandık bulucu
+    usage: /bekci [bak | oyuncu <ad> <süre> | yakin <yarıçap> <süre> | geri <ad> <süre> [yarıçap] | onayla | sandik yakin|oyuncu | git <no> | ender <oyuncu>]
+  mezar:
+    description: Mezarlarını listeler; op için liste ve silme
+    usage: /mezar [liste | sil <no>]
+
+permissions:
+  bekci.admin:
+    description: Bekçi komutları
+    default: op

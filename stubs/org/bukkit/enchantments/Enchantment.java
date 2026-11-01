@@ -1,0 +1,1 @@
+package org.bukkit.enchantments; public abstract class Enchantment { public static final Enchantment BINDING_CURSE = null; }

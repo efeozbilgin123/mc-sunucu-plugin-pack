@@ -1,0 +1,1 @@
+package org.bukkit.potion; public abstract class PotionEffectType { public static final PotionEffectType HASTE=null, SPEED=null, REGENERATION=null, SLOWNESS=null, MINING_FATIGUE=null, WEAKNESS=null, HUNGER=null, POISON=null, NAUSEA=null, ABSORPTION=null, RESISTANCE=null, FIRE_RESISTANCE=null, DARKNESS=null; }

@@ -1,0 +1,1 @@
+package org.bukkit.event.player; import org.bukkit.entity.*; public class PlayerDropItemEvent extends org.bukkit.event.Event { public Player getPlayer(){return null;} public void setCancelled(boolean c){} public Item getItemDrop(){return null;} }

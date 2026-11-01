@@ -1,0 +1,1 @@
+package org.bukkit.event.player; import org.bukkit.entity.*; import org.bukkit.inventory.EquipmentSlot; public class PlayerInteractEntityEvent extends org.bukkit.event.Event { public EquipmentSlot getHand(){return null;} public Player getPlayer(){return null;} public Entity getRightClicked(){return null;} public void setCancelled(boolean c){} }

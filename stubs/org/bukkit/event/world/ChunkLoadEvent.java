@@ -1,0 +1,1 @@
+package org.bukkit.event.world; public class ChunkLoadEvent extends org.bukkit.event.Event { public org.bukkit.World getWorld(){return null;} public org.bukkit.Chunk getChunk(){return null;} }

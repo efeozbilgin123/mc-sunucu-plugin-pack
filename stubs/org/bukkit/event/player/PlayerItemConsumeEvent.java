@@ -1,0 +1,1 @@
+package org.bukkit.event.player; import org.bukkit.entity.Player; import org.bukkit.inventory.ItemStack; public class PlayerItemConsumeEvent extends org.bukkit.event.Event { public ItemStack getItem(){return null;} public Player getPlayer(){return null;} public void setCancelled(boolean c){} }

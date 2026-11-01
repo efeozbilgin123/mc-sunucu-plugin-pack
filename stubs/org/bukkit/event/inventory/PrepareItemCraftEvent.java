@@ -1,0 +1,1 @@
+package org.bukkit.event.inventory; import org.bukkit.inventory.*; public class PrepareItemCraftEvent extends org.bukkit.event.Event { public CraftingInventory getInventory(){return null;} public Recipe getRecipe(){return null;} public InventoryView getView(){return null;} }

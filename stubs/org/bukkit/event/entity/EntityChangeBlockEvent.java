@@ -1,0 +1,1 @@
+package org.bukkit.event.entity; import org.bukkit.block.Block; import org.bukkit.entity.Entity; public class EntityChangeBlockEvent extends org.bukkit.event.Event { public Entity getEntity(){return null;} public Block getBlock(){return null;} public void setCancelled(boolean c){} }

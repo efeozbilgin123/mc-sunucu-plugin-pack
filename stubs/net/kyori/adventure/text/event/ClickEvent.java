@@ -1,0 +1,1 @@
+package net.kyori.adventure.text.event; public interface ClickEvent { static ClickEvent runCommand(String c){return null;} }

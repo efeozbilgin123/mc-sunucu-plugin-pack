@@ -1,0 +1,1 @@
+package org.bukkit; public interface Chunk { int getX(); int getZ(); World getWorld(); org.bukkit.block.BlockState[] getTileEntities();  boolean addPluginChunkTicket(org.bukkit.plugin.Plugin p); boolean removePluginChunkTicket(org.bukkit.plugin.Plugin p); }

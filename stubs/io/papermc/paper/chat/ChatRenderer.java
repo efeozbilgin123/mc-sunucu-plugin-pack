@@ -1,0 +1,1 @@
+package io.papermc.paper.chat; import net.kyori.adventure.text.Component; import org.bukkit.entity.Player; import net.kyori.adventure.audience.Audience; public interface ChatRenderer { Component render(Player source, Component sourceDisplayName, Component message, Audience viewer); }

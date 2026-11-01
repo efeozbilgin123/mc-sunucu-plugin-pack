@@ -1,0 +1,1 @@
+package org.bukkit.event.entity; import org.bukkit.entity.*; public class EntityPickupItemEvent extends org.bukkit.event.Event { public LivingEntity getEntity(){return null;} public Item getItem(){return null;} public void setCancelled(boolean c){} }

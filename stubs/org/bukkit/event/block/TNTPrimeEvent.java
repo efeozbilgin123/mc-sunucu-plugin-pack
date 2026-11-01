@@ -1,0 +1,1 @@
+package org.bukkit.event.block; import org.bukkit.block.Block; import org.bukkit.entity.Entity; public class TNTPrimeEvent extends org.bukkit.event.Event { public Block getBlock(){return null;} public Entity getPrimingEntity(){return null;} }

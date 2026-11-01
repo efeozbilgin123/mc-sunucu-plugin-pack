@@ -1,0 +1,1 @@
+package org.bukkit.event.inventory; import org.bukkit.entity.HumanEntity; import org.bukkit.inventory.Inventory; public class InventoryCloseEvent extends org.bukkit.event.Event { public HumanEntity getPlayer(){return null;} public Inventory getInventory(){return null;} }

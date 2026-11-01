@@ -1,0 +1,1 @@
+package org.bukkit.event.player; import org.bukkit.Location; import org.bukkit.entity.Player; public class PlayerMoveEvent extends org.bukkit.event.Event { public Player getPlayer(){return null;} public Location getFrom(){return null;} public Location getTo(){return null;} public void setTo(Location l){} public void setCancelled(boolean c){} }

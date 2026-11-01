@@ -1,0 +1,1 @@
+package org.bukkit.entity; public interface TextDisplay extends Display { void text(net.kyori.adventure.text.Component c); void setLineWidth(int w); void setBackgroundColor(org.bukkit.Color c); void setShadowed(boolean s); }

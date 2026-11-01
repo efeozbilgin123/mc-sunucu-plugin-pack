@@ -1,0 +1,21 @@
+# Bekçi ayarları
+
+# Kayıtlar kaç gün saklansın (daha eskiler kendiliğinden silinir)
+saklama-gun: 30
+
+# Sandık bulucu: /bekci sandik yakin [yarıçap]
+sandik:
+  varsayilan: 64
+  en-fazla: 160
+  # Java'da bulunan kaplar 30 sn duvar arkasından parlasın (sadece komutu yazan görür)
+  xray: true
+
+# Mezar: ölünce eşyalar ve XP mezara girer
+mezar:
+  acik: true
+  # Bu kadar dakika sonra herkes açabilir (önce: sahibi, onu PvP'de öldüren, polis/başkan; op her zaman)
+  herkese-acik-dk: 30
+  # Bu kadar saat sonra mezar ve içindekiler silinir
+  silinme-saat: 24
+  # Mezarın etrafında ruh parçacıkları
+  parcacik: true

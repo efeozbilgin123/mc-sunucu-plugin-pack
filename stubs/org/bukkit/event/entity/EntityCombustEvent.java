@@ -1,0 +1,1 @@
+package org.bukkit.event.entity; import org.bukkit.entity.Entity; public class EntityCombustEvent extends org.bukkit.event.Event { public Entity getEntity(){return null;} public void setCancelled(boolean c){} }

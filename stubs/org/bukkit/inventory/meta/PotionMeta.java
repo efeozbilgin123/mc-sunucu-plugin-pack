@@ -1,0 +1,1 @@
+package org.bukkit.inventory.meta; import org.bukkit.Color; import org.bukkit.potion.PotionEffect; public interface PotionMeta extends ItemMeta { void setColor(Color c); boolean addCustomEffect(PotionEffect e, boolean overwrite); }

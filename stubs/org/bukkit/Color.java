@@ -1,0 +1,1 @@
+package org.bukkit; public final class Color { public static Color fromRGB(int rgb){return null;} public static Color fromARGB(int a,int r,int g,int b){return null;} }

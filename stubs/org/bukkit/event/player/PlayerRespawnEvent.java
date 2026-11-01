@@ -1,0 +1,1 @@
+package org.bukkit.event.player; import org.bukkit.Location; import org.bukkit.entity.Player; public class PlayerRespawnEvent extends org.bukkit.event.Event { public Player getPlayer(){return null;} public Location getRespawnLocation(){return null;} public void setRespawnLocation(Location l){} }

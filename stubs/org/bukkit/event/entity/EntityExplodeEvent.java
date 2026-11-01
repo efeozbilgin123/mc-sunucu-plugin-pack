@@ -1,0 +1,1 @@
+package org.bukkit.event.entity; import org.bukkit.block.Block; import java.util.List; public class EntityExplodeEvent extends org.bukkit.event.Event { public List<Block> blockList(){return null;} }

@@ -1,0 +1,1 @@
+package net.kyori.adventure.bossbar; import net.kyori.adventure.text.Component; public interface BossBar { enum Color { WHITE, RED, BLUE, YELLOW, GREEN, PINK, PURPLE } enum Overlay { PROGRESS } static BossBar bossBar(Component n, float p, Color c, Overlay o){return null;} BossBar name(Component n); BossBar progress(float p); BossBar color(Color c); }

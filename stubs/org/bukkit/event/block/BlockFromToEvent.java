@@ -1,0 +1,1 @@
+package org.bukkit.event.block; import org.bukkit.block.Block; public class BlockFromToEvent extends org.bukkit.event.Event { public Block getToBlock(){return null;} public void setCancelled(boolean c){} }

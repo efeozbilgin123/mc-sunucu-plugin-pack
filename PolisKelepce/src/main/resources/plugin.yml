@@ -1,0 +1,74 @@
+name: PolisKelepce
+version: 1.10.5
+main: tr.efe.polis.PolisPlugin
+api-version: '1.21'
+author: Efe
+description: Polis, belediye başkanı ve doktor rolleri, kelepçe, üst arama, ceza/vergi, sicil, yaralı sistemi. Java ve Bedrock (Geyser) uyumlu, resource pack gerektirmez.
+
+commands:
+  polis:
+    description: Polis sistemi yardım, liste; op'lar için polis atama
+    usage: /polis [liste | log [oyuncu] [sayfa] | yap [adet] | ekle <oyuncu> | cikar <oyuncu> | ver <oyuncu> [adet] | anahtar <kelepçeli> [kime]]
+  baskan:
+    description: Belediye başkanını gösterir; op'lar atar / görevden alır
+    usage: /baskan [ata <oyuncu> | kaldir]
+    aliases: [belediye]
+  kelepce:
+    description: (Polis) Yakındaki oyuncuyu kelepçeler / bırakır / tekrar götürür
+    usage: /kelepce <oyuncu>
+  anahtar:
+    description: Üstündeki uygun anahtarla yakındaki oyuncunun kelepçesini açar
+    usage: /anahtar <oyuncu>
+  koy:
+    description: (Polis) Baktığın bloğa mahkumu koyar (hücreye yerleştirme)
+    usage: /koy <oyuncu>
+  ara:
+    description: (Polis) Yakındaki kelepçeli oyuncunun üstünü arar
+    usage: /ara <oyuncu>
+  ceza:
+    description: Ceza / vergi yaz, listele, iptal et, kelepçeliden tahsil et
+    usage: /ceza <oyuncu> <miktar> <eşya> [süre] [sebep] | liste | borclular | iptal <no> | tahsil <oyuncu>
+  vergi:
+    description: (Başkan) Vergi yaz; sicile işlenmez
+    usage: /vergi <oyuncu|@a> <miktar> <eşya> [süre] [sebep]
+  ode:
+    description: Cezanı öde
+    usage: /ode [no]
+  serbest:
+    description: (Op) Kelepçeyi anahtarsız açar
+    usage: /serbest <oyuncu>
+  idam:
+    description: (Başkan) İdam kararı; polis darağacında uygular
+    usage: /idam <oyuncu> [süre] | iptal <oyuncu> | affet <oyuncu> | liste | cevrimdisi <oyuncu> [süre] | test [oyuncu]
+  sicil:
+    description: Oyuncunun sicili (gözaltı, ceza, geç ödeme)
+    usage: /sicil [oyuncu]
+  siren:
+    description: (Polis) Kırmızı-mavi ışık ve siren aç / kapat
+    usage: /siren
+  pano:
+    description: (Polis) Karakol panosu kur / kaldır
+    usage: /pano <kur | kaldir>
+  doktor:
+    description: Doktor sistemi yardım, liste; op/başkan için doktor atama
+    usage: /doktor [liste | ekle <oyuncu> | cikar <oyuncu>]
+  kaldir:
+    description: Yanındaki yaralıyı kaldırır
+    usage: /kaldir <oyuncu>
+  ol:
+    description: Yaralıyken beklemeden ölür (pes et)
+    usage: /ol
+
+permissions:
+  poliskelepce.admin:
+    description: Polis atama/alma, kelepçe verme, /serbest, her cezayı iptal (belediye başkanında da var)
+    default: op
+  poliskelepce.baskan-ata:
+    description: Belediye başkanı atama / görevden alma
+    default: op
+  poliskelepce.idam-cevrimdisi:
+    description: Oyunda olmayan oyuncuyu idam etme (/idam cevrimdisi) - sadece op, başkana verilmez
+    default: op
+  poliskelepce.rol.polis:
+    description: Polis ya da başkan rolü (eklenti kendisi verir; mezar ve diğer eklentiler okur)
+    default: false

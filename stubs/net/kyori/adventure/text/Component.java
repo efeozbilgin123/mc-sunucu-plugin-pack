@@ -1,0 +1,1 @@
+package net.kyori.adventure.text; import net.kyori.adventure.text.format.*; public interface Component { static TextComponent text(String s, TextColor c){return null;} static TextComponent text(String s){return null;} Component append(Component c); Component decoration(TextDecoration d, boolean v);  Component clickEvent(net.kyori.adventure.text.event.ClickEvent e); }

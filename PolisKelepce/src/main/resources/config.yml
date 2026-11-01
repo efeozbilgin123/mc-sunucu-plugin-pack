@@ -1,0 +1,70 @@
+# Polis / Kelepçe ayarları
+
+# Götürülen kelepçeli polisten bu kadar bloktan fazla geride kalırsa polisin izine (arkasına) ışınlanır
+cekme-mesafesi: 3.0
+
+# Sürüklenen oyuncu polisten bu kadar uzağa düşerse (ya da polis başka boyuta geçerse) yanına ışınlanır
+isinlama-mesafesi: 16.0
+
+# Kelepçe animasyonu: eller önde birleşik görünür, bileklerde parıltı, götürülürken zincir çizgisi
+animasyon: true
+
+# Ceza / vergi
+ceza:
+  # true: /ceza yazıldığı anda oyuncunun üstünde yeterince varsa direkt alınır (vergi toplamak için pratik).
+  # false: oyuncu /ode ile kendisi öder (ya da kelepçeliyse polis /ceza tahsil yapar).
+  aninda-tahsil: false
+  # Varsayılan ödeme süresi (saat). Bu süre geçen ceza "gecikmiş" sayılır (listede kırmızı, Tab'da "!").
+  # Cezaya özel süre de verilebilir: /ceza Ahmet 5 demir 2g sebep. 0 = varsayılan süresiz
+  gecikme-saat: 72
+  # Tek cezada istenebilecek en fazla eşya (0 = sınırsız)
+  max-miktar: 0
+  # Ceza yazılınca oyuncuya makbuz kitabı verilsin (ödenince ÖDENDİ damgası basılır)
+  makbuz: true
+
+# Kayıt, makbuz ve panodaki saatler için saat dilimi
+saat-dilimi: Europe/Istanbul
+
+# Görsel şeyler
+gorsel:
+  # Kelepçelenince / açılınca / yaralanınca ekranın ortasında büyük yazı
+  ekran-yazisi: true
+  # Ekranın üstünde durum çubuğu: gözaltı, yaralı geri sayımı, ödenmemiş ceza süresi
+  bossbar: true
+  # Kafa üstünde rol ([Polis] [Başkan] [Doktor]) ve durum ([GÖZALTI] [YARALI] [ARANIYOR]). [Mimar] gibi takımla yan yana yazar
+  kafa-etiketi: true
+  # Etiketlerde simge: [★ Polis] [♛ Başkan] [✚ Doktor]. Bedrock'ta kutu görünürse false yap
+  simgeler: true
+  # /siren kaç saniye açık kalsın
+  siren-sure: 30
+  # Yaralıyken kalp atışı sesi ve son 15 saniyede ekran kararması
+  yarali-kalp: true
+  # Kelepçe takılınca zincir sesi ve kıvılcım, açılınca kilit sesi
+  kelepce-efekt: true
+  # İdamda çan, davul ve duman
+  idam-efekt: true
+
+# Yaralı sistemi: bir oyuncu tarafından ölecek kadar vurulan yere yığılır, kaldırılmazsa ölür (yaratık/düşme vb. normal ölüm)
+yarali:
+  acik: true
+  # Kaldırılmazsa kaç saniye sonra ölür
+  sure: 60
+  # Doktorun ve doktor olmayanın kaldırma süresi (saniye)
+  doktor-sure: 3
+  arkadas-sure: 8
+  # Kaldırılınca verilen can (2 = 1 kalp)
+  doktor-can: 10
+  arkadas-can: 4
+
+# Savaştan çıkma engeli: oyuncu oyuncuya vurunca ikisi de bu kadar saniye "savaşta" sayılır.
+# Savaştayken bilerek çıkan ölür; bağlantısı kopan, atılan ya da restart'ta düşen ölmez.
+savas:
+  sure: 15
+
+# İdam: başkan /idam Ahmet [süre] ile karar verir, polis elinde kayışla Shift + çite sağ tıklayarak uygular
+idam:
+  # İdam edilenin sunucuya giremeyeceği süre (yazılmazsa) ve en fazlası
+  varsayilan-sure: 30dk
+  en-fazla-sure: 1g
+  # Kararın geçerli kaldığı süre (dakika)
+  onay-dk: 10

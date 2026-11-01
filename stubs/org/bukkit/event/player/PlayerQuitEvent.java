@@ -1,0 +1,1 @@
+package org.bukkit.event.player; import org.bukkit.entity.Player; public class PlayerQuitEvent extends org.bukkit.event.Event { public enum QuitReason { DISCONNECTED, KICKED, TIMED_OUT, ERRONEOUS_STATE } public Player getPlayer(){return null;} public QuitReason getReason(){return null;} }

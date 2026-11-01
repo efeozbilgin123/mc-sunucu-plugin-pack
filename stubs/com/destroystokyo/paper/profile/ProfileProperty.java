@@ -1,0 +1,1 @@
+package com.destroystokyo.paper.profile; public final class ProfileProperty { public ProfileProperty(String n, String v, String s){} }

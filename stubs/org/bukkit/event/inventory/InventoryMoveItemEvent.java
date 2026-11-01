@@ -1,0 +1,1 @@
+package org.bukkit.event.inventory; import org.bukkit.inventory.Inventory; public class InventoryMoveItemEvent extends org.bukkit.event.Event { public Inventory getSource(){return null;} public Inventory getDestination(){return null;} }

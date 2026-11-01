@@ -1,0 +1,1 @@
+package org.bukkit.block; public interface Skull extends BlockState { void setOwningPlayer(org.bukkit.OfflinePlayer p); boolean update(); }

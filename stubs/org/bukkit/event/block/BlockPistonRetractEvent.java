@@ -1,0 +1,1 @@
+package org.bukkit.event.block; import org.bukkit.block.Block; import java.util.List; public class BlockPistonRetractEvent extends org.bukkit.event.Event { public List<Block> getBlocks(){return null;} public void setCancelled(boolean c){} }

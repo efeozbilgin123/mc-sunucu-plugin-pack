@@ -1,0 +1,1 @@
+package org.bukkit.inventory; import org.bukkit.NamespacedKey; public class SmokingRecipe extends CookingRecipe<SmokingRecipe> { public SmokingRecipe(NamespacedKey k, ItemStack r, RecipeChoice in, float xp, int t){super(k,r,in,xp,t);} }

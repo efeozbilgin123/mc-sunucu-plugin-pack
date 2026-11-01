@@ -1,0 +1,1 @@
+package org.bukkit.event.inventory; import org.bukkit.entity.HumanEntity; import org.bukkit.inventory.*; public class CraftItemEvent extends org.bukkit.event.Event { public Recipe getRecipe(){return null;} public HumanEntity getWhoClicked(){return null;} public void setCancelled(boolean c){} }

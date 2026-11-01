@@ -1,0 +1,15 @@
+# Çay Ocağı ayarları
+
+# Kuru çay kazana atıldıktan sonra demlenme süresi (saniye).
+# Kamp ateşi sönerse demlenme durur, yakınca devam eder.
+demlenme-suresi: 60
+
+# Çimen / uzun çimen / eğrelti kırınca "Taze Çay Yaprağı" düşme ihtimali (0.0 - 1.0)
+yaprak-sansi: 0.08
+
+# Çay demlenince kaç blok yakındaki oyunculara haber verilsin
+haber-mesafesi: 16
+
+gorsel:
+  # Semaverin üstünde "Demleniyor... %60" / "Çay hazır!" yazısı
+  semaver-yazisi: true

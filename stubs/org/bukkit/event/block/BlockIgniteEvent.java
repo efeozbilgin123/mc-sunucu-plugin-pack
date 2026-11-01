@@ -1,0 +1,1 @@
+package org.bukkit.event.block; import org.bukkit.block.Block; import org.bukkit.entity.Player; public class BlockIgniteEvent extends org.bukkit.event.Event { public Block getBlock(){return null;} public Player getPlayer(){return null;} }

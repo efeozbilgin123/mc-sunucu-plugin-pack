@@ -1,0 +1,1 @@
+package org.bukkit.inventory; public interface Inventory { void setItem(int i, ItemStack s); ItemStack getItem(int i); InventoryHolder getHolder(); ItemStack[] getContents(); void setContents(ItemStack[] c); int getSize(); org.bukkit.Location getLocation(); org.bukkit.event.inventory.InventoryType getType(); }

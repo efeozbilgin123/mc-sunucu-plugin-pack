@@ -1,0 +1,1 @@
+package org.bukkit.scoreboard; public interface Scoreboard { Team getEntryTeam(String e); Team getTeam(String n); Team registerNewTeam(String n); }

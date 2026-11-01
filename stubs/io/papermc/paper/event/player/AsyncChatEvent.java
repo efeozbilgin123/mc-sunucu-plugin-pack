@@ -1,0 +1,1 @@
+package io.papermc.paper.event.player; import io.papermc.paper.chat.ChatRenderer; import org.bukkit.entity.Player; public class AsyncChatEvent extends org.bukkit.event.Event { public Player getPlayer(){return null;} public ChatRenderer renderer(){return null;} public void renderer(ChatRenderer r){} }

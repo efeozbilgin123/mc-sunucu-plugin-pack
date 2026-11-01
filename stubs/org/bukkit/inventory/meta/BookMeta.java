@@ -1,0 +1,1 @@
+package org.bukkit.inventory.meta; import net.kyori.adventure.text.Component; import java.util.List; public interface BookMeta extends ItemMeta { BookMeta title(Component c); BookMeta author(Component c); BookMeta pages(List<Component> p); }

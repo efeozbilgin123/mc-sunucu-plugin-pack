@@ -1,0 +1,1 @@
+package org.bukkit.entity; public interface LivingEntity extends Entity { double getHealth(); void setHealth(double h); double getMaxHealth(); double getAbsorptionAmount(); void setInvisible(boolean i); void setAI(boolean a); boolean setLeashHolder(Entity e);  Player getKiller();  void setKiller(Player k); }

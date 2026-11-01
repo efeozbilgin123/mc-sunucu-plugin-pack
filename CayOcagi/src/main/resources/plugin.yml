@@ -1,0 +1,17 @@
+name: CayOcagi
+version: 1.3.0
+main: tr.efe.cay.CayPlugin
+api-version: '1.21'
+author: Efe
+description: Semaverde çay demle. Java ve Bedrock (Geyser) oyuncularla uyumlu, resource pack gerektirmez.
+
+commands:
+  cay:
+    description: Çay ocağı yardım ve yönetim komutları
+    usage: /cay [yardim | yap <kuru|fidan|sekerli> [adet] | ver <oyuncu> <yaprak|kuru|cay|sekerli|fidan> [adet]]
+    aliases: [cayocagi]
+
+permissions:
+  cayocagi.ver:
+    description: /cay ver komutunu kullanma izni
+    default: op

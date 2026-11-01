@@ -1,0 +1,1 @@
+package org.bukkit.event.player; public class PlayerTeleportEvent extends PlayerMoveEvent { }

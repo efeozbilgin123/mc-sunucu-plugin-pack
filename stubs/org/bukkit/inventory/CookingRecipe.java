@@ -1,0 +1,1 @@
+package org.bukkit.inventory; import org.bukkit.*; public abstract class CookingRecipe<T> implements Recipe, Keyed { public CookingRecipe(NamespacedKey k, ItemStack r, RecipeChoice in, float xp, int t){} public ItemStack getResult(){return null;} public NamespacedKey getKey(){return null;} }
