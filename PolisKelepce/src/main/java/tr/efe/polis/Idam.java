@@ -247,7 +247,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
             String[] skin = SkinKopru.skin(id, isim);
             Bukkit.getScheduler().runTask(plugin, () -> {
                 try {
-                    mankenSahnesi(daragaci, id, isim, skin);
+                    mankenSahnesi(daragaci, id, isim, skin, false, s instanceof Player op ? op.getLocation() : null);
                 } catch (RuntimeException ex) { // manken desteklenmiyorsa vb.: sahnesiz devam
                     plugin.getLogger().warning("Gıyabi idam sahnesi oynatılamadı: " + ex);
                     Bukkit.broadcast(Component.text(isim + " gıyabında idam edildi.", NamedTextColor.GRAY));
@@ -302,7 +302,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
             String[] skin = SkinKopru.skin(id, gosterilen);
             Bukkit.getScheduler().runTask(plugin, () -> {
                 try {
-                    mankenSahnesi(cit, id, gosterilen, skin, true);
+                    mankenSahnesi(cit, id, gosterilen, skin, true, op.getLocation());
                 } catch (RuntimeException ex) {
                     plugin.mesaj(s, "Sahne oynatılamadı: " + ex.getMessage(), NamedTextColor.RED);
                 }
@@ -310,15 +310,14 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         });
     }
 
-    private void mankenSahnesi(Block cit, UUID id, String isim, String[] skin) {
-        mankenSahnesi(cit, id, isim, skin, false);
-    }
-
-    private void mankenSahnesi(Block cit, UUID id, String isim, String[] skin, boolean test) {
+    /** bakan: idamı yapan op'un yeri; manken ona dönük asılır (null: güney). */
+    private void mankenSahnesi(Block cit, UUID id, String isim, String[] skin, boolean test, Location bakan) {
         org.bukkit.Chunk bolge = cit.getChunk();
         bolge.addPluginChunkTicket(plugin); // kimse yakında değilse de sahne bitsin
         Location taban = cit.getLocation().add(0.5, -3, 0.5);
-        float yaw = taban.getYaw();
+        float yaw = bakan != null && bakan.getWorld().equals(taban.getWorld())
+                ? IdamKurali.yuzYonu(bakan.getX() - taban.getX(), bakan.getZ() - taban.getZ(), bakan.getYaw() + 180f) : 0f;
+        taban.setYaw(yaw);
         io.papermc.paper.datacomponent.item.ResolvableProfile.Builder profil =
                 io.papermc.paper.datacomponent.item.ResolvableProfile.resolvableProfile().uuid(id);
         try {
@@ -370,8 +369,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
                 int kalan = 5 - t / 20;
                 for (Player o : cit.getWorld().getPlayers()) {
                     if (o.getLocation().distance(taban) <= 32) {
-                        plugin.gorsel().baslik(o, (test ? "TEST - İDAM: " : "İDAM: ") + isim, kalan + (test ? "  (deneme)" : "  (gıyabında)"),
-                                NamedTextColor.DARK_RED, null, 1f);
+                        o.sendActionBar(geriSayim((test ? "TEST - İDAM: " : "İDAM: ") + isim, kalan, test ? "deneme" : "gıyabında"));
                     }
                 }
             }
@@ -519,7 +517,10 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         sh.mahkum = mahkum.getUniqueId();
         sh.mahkumIsim = mahkum.getName();
         sh.cit = cit.getLocation();
-        sh.yaw = mahkum.getLocation().getYaw();
+        // Mahkum idamı uygulayan polise dönük asılır; sehpa da ona doğru devrilir
+        Location tabanYeri = cit.getLocation().add(0.5, -3, 0.5);
+        sh.yaw = IdamKurali.yuzYonu(polis.getLocation().getX() - tabanYeri.getX(), polis.getLocation().getZ() - tabanYeri.getZ(),
+                mahkum.getLocation().getYaw());
         sh.taban = cit.getLocation().add(0.5, -3, 0.5);
         sh.taban.setYaw(sh.yaw);
         sh.onay = onaylar.get(mahkum.getUniqueId());
@@ -531,8 +532,8 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         mahkum.setAllowFlight(true);
         mahkum.setFlySpeed(0f);
         Location sehpaUstu = sh.taban.clone().add(0, IdamKurali.SEHPA_YUKSEKLIK, 0);
-        sehpaUstu.setYaw(mahkum.getLocation().getYaw());
-        sehpaUstu.setPitch(mahkum.getLocation().getPitch());
+        sehpaUstu.setYaw(sh.yaw); // başta polise baksın, sonra kamerası serbest
+        sehpaUstu.setPitch(0f);
         mahkum.teleport(sehpaUstu);
         mahkum.setFlying(true);
 
@@ -588,7 +589,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
             int kalan = 5 - t / 20;
             for (Player o : mahkum.getWorld().getPlayers()) {
                 if (o.getLocation().distance(mahkum.getLocation()) <= 32) {
-                    plugin.gorsel().baslik(o, "İDAM: " + sh.mahkumIsim, String.valueOf(kalan), NamedTextColor.DARK_RED, null, 1f);
+                    o.sendActionBar(geriSayim("İDAM: " + sh.mahkumIsim, kalan, null));
                 }
             }
         }
@@ -695,6 +696,16 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
             sehpaBloklari.remove(d.getUniqueId());
             d.remove();
         }
+    }
+
+    /** Geri sayım alt yazısı (ekran ortasını kapatmaz, sahne görünsün). */
+    private static Component geriSayim(String baslik, int kalan, String ek) {
+        Component c = Component.text(baslik + "  ", NamedTextColor.DARK_RED)
+                .decoration(net.kyori.adventure.text.format.TextDecoration.BOLD, true)
+                .append(Component.text(String.valueOf(kalan), NamedTextColor.RED));
+        if (ek != null) c = c.append(Component.text("  (" + ek + ")", NamedTextColor.GRAY)
+                .decoration(net.kyori.adventure.text.format.TextDecoration.BOLD, false));
+        return c;
     }
 
     /** Çitten boyna ip: {görünmez tavuk, kayış düğümü (kurulamazsa null: ip parçacıkla çizilir)} */

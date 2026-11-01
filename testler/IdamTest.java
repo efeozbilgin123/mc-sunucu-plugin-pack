@@ -67,5 +67,11 @@ public class IdamTest {
         double top = 0;
         for (int t = 100; t < 140; t++) top += IdamKurali.kaymaHizi(t);
         Dogrula.dogru(Math.abs(top - (IdamKurali.salinimKayma(140) - IdamKurali.salinimKayma(100))) < 1e-9, "hızların toplamı sarkaç kaymasını verir");
+        // Yön: mahkum idamı yapan kişiye (polis / op) dönük asılır; sehpa da ona doğru devrilir
+        Dogrula.esit(0f, IdamKurali.yuzYonu(0, 5, 123f), "uygulayan güneyde: güneye bakar");
+        Dogrula.esit(90f, IdamKurali.yuzYonu(-5, 0, 123f), "uygulayan batıda: batıya bakar");
+        Dogrula.esit(180f, Math.abs(IdamKurali.yuzYonu(0, -5, 123f)), "uygulayan kuzeyde: kuzeye bakar");
+        Dogrula.esit(-90f, IdamKurali.yuzYonu(5, 0, 123f), "uygulayan doğuda: doğuya bakar");
+        Dogrula.esit(123f, IdamKurali.yuzYonu(0.1, 0.2, 123f), "tam altındaysa yedek yön");
     }
 }

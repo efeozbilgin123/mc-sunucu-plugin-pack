@@ -119,4 +119,13 @@ public final class IdamKurali {
     public static double kaymaHizi(int t) {
         return salinimKayma(t + 1) - salinimKayma(t);
     }
+
+    /**
+     * Mahkumun bakacağı yön (Minecraft yaw): idamı yapana (dx, dz = uygulayan − darağacı) dönük.
+     * Uygulayan tam altındaysa (yarım bloktan yakın) yedek yön.
+     */
+    public static float yuzYonu(double dx, double dz, float yedek) {
+        if (dx * dx + dz * dz < 0.25) return yedek;
+        return (float) Math.toDegrees(Math.atan2(-dx, dz)) + 0f; // -0 yerine 0
+    }
 }
