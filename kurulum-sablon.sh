@@ -63,6 +63,8 @@ if ! command -v mvn >/dev/null 2>&1; then
   sudo apt-get update -y
   sudo apt-get install -y maven
 fi
+# Maven'ın kendi kütüphanesi (guava) Java 25'te "sun.misc.Unsafe" uyarısı basıyor; zararsız, sustur
+export MAVEN_OPTS="--sun-misc-unsafe-memory-access=allow ${MAVEN_OPTS:-}"
 JAVA_HOME="$JDK" mvn -v | head -1
 
 renk "3/6 Kaynak kod çıkarılıyor"
