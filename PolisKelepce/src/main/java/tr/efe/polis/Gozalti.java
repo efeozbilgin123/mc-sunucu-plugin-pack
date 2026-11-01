@@ -489,12 +489,17 @@ public final class Gozalti implements Listener, CommandExecutor, TabCompleter {
         if (!animasyonAcik()) return;
         World w = h.getWorld();
         Location ayak = h.getLocation();
-        // Elleri önde: yakındaki Java oyuncularına sahte el eşyası (Bedrock'ta arbalet görünürdü, ona gönderilmez)
+        // Elleri önde: yakındaki Java oyuncularına sahte el eşyası (dolu arbalet duruşu, zincir görüntüsü).
+        // Bedrock'ta bu duruş ve görüntü değişikliği yok (arbalet görünürdü): iki eline de gerçek zincir.
         for (Player izleyen : w.getPlayers()) {
-            if (izleyen.equals(h) || Kayitlar.bedrockMu(izleyen.getUniqueId())
-                    || izleyen.getLocation().distanceSquared(ayak) > 48 * 48) continue;
-            izleyen.sendEquipmentChange(h, EquipmentSlot.HAND, kelepceGorunumu());
-            izleyen.sendEquipmentChange(h, EquipmentSlot.OFF_HAND, new ItemStack(org.bukkit.Material.AIR));
+            if (izleyen.equals(h) || izleyen.getLocation().distanceSquared(ayak) > 48 * 48) continue;
+            if (Kayitlar.bedrockMu(izleyen.getUniqueId())) {
+                izleyen.sendEquipmentChange(h, EquipmentSlot.HAND, new ItemStack(org.bukkit.Material.IRON_CHAIN));
+                izleyen.sendEquipmentChange(h, EquipmentSlot.OFF_HAND, new ItemStack(org.bukkit.Material.IRON_CHAIN));
+            } else {
+                izleyen.sendEquipmentChange(h, EquipmentSlot.HAND, kelepceGorunumu());
+                izleyen.sendEquipmentChange(h, EquipmentSlot.OFF_HAND, new ItemStack(org.bukkit.Material.AIR));
+            }
         }
         // Önde birleşen bileklerde küçük demir parıltısı
         org.bukkit.util.Vector bak = ayak.getDirection().setY(0);

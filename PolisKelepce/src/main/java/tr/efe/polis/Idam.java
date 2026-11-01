@@ -63,7 +63,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         Location cit;
         Chicken ip;
         LeashHitch dugum;
-        List<BlockDisplay> sehpa;
+        List<org.bukkit.entity.Entity> sehpa;
         int tick;
         BukkitTask gorev;
         Onay onay;
@@ -339,7 +339,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
             m.customName(Component.text(isim, NamedTextColor.GRAY));
             m.setCustomNameVisible(true);
         });
-        List<BlockDisplay> sehpa = sehpaKur(taban, yaw);
+        List<org.bukkit.entity.Entity> sehpa = sehpaKur(taban, yaw);
         Object[] ip = ipKur(cit, taban.clone().add(0, IdamKurali.SEHPA_YUKSEKLIK + 1.45, 0));
         Chicken tavuk = (Chicken) ip[0];
         LeashHitch dugum = (LeashHitch) ip[1];
@@ -375,7 +375,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
                     }
                 }
             }
-            sehpaAdim(sehpa, taban, t, efekt);
+            sehpaAdim(sehpa, taban, yaw, t, efekt);
             if (efekt && t == IdamKurali.SALINIM_BASLA) cit.getWorld().playSound(taban, Sound.BLOCK_CHAIN_PLACE, 1.5f, 0.6f);
         }, 1L, 1L);
     }
@@ -592,7 +592,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
                 }
             }
         }
-        sehpaAdim(sh.sehpa, sh.taban, t, efekt);
+        sehpaAdim(sh.sehpa, sh.taban, sh.yaw, t, efekt);
         if (efekt && t == IdamKurali.SALINIM_BASLA) mahkum.getWorld().playSound(mahkum.getLocation(), Sound.BLOCK_CHAIN_PLACE, 1.5f, 0.6f);
         if (t >= IdamKurali.SAHNE_SON) bitir(sh, mahkum, polis.getName(), true);
     }
@@ -611,13 +611,13 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
             {0.23f, 0f, -0.12f, 0.10f, 0.85f, 0.10f},
     };
 
-    private static List<BlockDisplay> sehpaKur(Location taban, float yaw) {
+    private List<org.bukkit.entity.Entity> sehpaKur(Location taban, float yaw) {
         double r = Math.toRadians(yaw);
         // Dönme ekseni mahkumun önünde: sehpa tekmelenince öne devrilir
         Location eksen = taban.clone().add(-Math.sin(r) * 0.35, 0, Math.cos(r) * 0.35);
         eksen.setYaw(yaw);
         eksen.setPitch(0);
-        List<BlockDisplay> liste = new ArrayList<>();
+        List<org.bukkit.entity.Entity> liste = new ArrayList<>();
         for (int i = 0; i < SEHPA_PARCA.length; i++) {
             float[] p = SEHPA_PARCA[i];
             org.bukkit.Material m = i == 0 ? org.bukkit.Material.SPRUCE_PLANKS : org.bukkit.Material.STRIPPED_SPRUCE_LOG;
@@ -627,7 +627,31 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
                 d.setTransformation(sehpaDonusumu(p, 0f));
             }));
         }
+        // Bedrock (Geyser blok görüntülerini çeviremez): yalnızca Bedrock oyuncularına görünen düşen blok
+        org.bukkit.entity.FallingBlock blok = taban.getWorld().spawnFallingBlock(taban.clone(),
+                org.bukkit.Material.SCAFFOLDING.createBlockData());
+        blok.setGravity(false);
+        blok.setDropItem(false);
+        blok.setCancelDrop(true);
+        blok.setHurtEntities(false);
+        blok.setPersistent(false);
+        blok.setVisibleByDefault(false);
+        for (Player o : taban.getWorld().getPlayers()) {
+            if (Kayitlar.bedrockMu(o.getUniqueId())) o.showEntity(plugin, blok);
+        }
+        sehpaBloklari.add(blok.getUniqueId());
+        liste.add(blok);
         return liste;
+    }
+
+    /** Bedrock sehpası (düşen blok) yere değince blok koymasın, yok olsun. */
+    private final Set<UUID> sehpaBloklari = new HashSet<>();
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onSehpaDustu(org.bukkit.event.entity.EntityChangeBlockEvent e) {
+        if (!sehpaBloklari.remove(e.getEntity().getUniqueId())) return;
+        e.setCancelled(true);
+        e.getEntity().remove();
     }
 
     /** Parçanın, eksen etrafında "aci" derece öne yatmış (ve öne kaymış) hali: ötele = R·ofset, döndür = R. */
@@ -641,12 +665,21 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
     }
 
     /** 100'de tekmelenir; 2 tick'te bir yeni açıya yumuşakça (istemci ara kareleri çizer) devrilir. */
-    private static void sehpaAdim(List<BlockDisplay> sehpa, Location taban, int t, boolean efekt) {
+    private static void sehpaAdim(List<org.bukkit.entity.Entity> sehpa, Location taban, float yaw, int t, boolean efekt) {
         if (sehpa == null || t < 100 || t > 104 || (t - 100) % 2 != 0) return;
         float aci = IdamKurali.sehpaAcisi(t);
         for (int i = 0; i < sehpa.size(); i++) {
-            BlockDisplay d = sehpa.get(i);
-            if (!d.isValid()) continue;
+            org.bukkit.entity.Entity e = sehpa.get(i);
+            if (!e.isValid()) continue;
+            if (!(e instanceof BlockDisplay d)) {
+                // Bedrock sehpası: tekmeyle öne fırlar, düşer
+                if (t == 100) {
+                    double r = Math.toRadians(yaw);
+                    e.setGravity(true);
+                    e.setVelocity(new org.bukkit.util.Vector(-Math.sin(r) * 0.3, 0.25, Math.cos(r) * 0.3));
+                }
+                continue;
+            }
             d.setInterpolationDelay(0);
             d.setInterpolationDuration(2);
             d.setTransformation(sehpaDonusumu(SEHPA_PARCA[i], aci));
@@ -656,9 +689,12 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         if (t == 104) taban.getWorld().playSound(taban, Sound.BLOCK_WOOD_FALL, 1.5f, 0.8f);
     }
 
-    private static void sehpaKaldir(List<BlockDisplay> sehpa) {
+    private void sehpaKaldir(List<org.bukkit.entity.Entity> sehpa) {
         if (sehpa == null) return;
-        for (BlockDisplay d : sehpa) d.remove();
+        for (org.bukkit.entity.Entity d : sehpa) {
+            sehpaBloklari.remove(d.getUniqueId());
+            d.remove();
+        }
     }
 
     /** Çitten boyna ip: {görünmez tavuk, kayış düğümü (kurulamazsa null: ip parçacıkla çizilir)} */
