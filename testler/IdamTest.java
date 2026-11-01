@@ -24,11 +24,7 @@ public class IdamTest {
         // Sahne zaman çizelgesi (oyuncu ve manken sahnesi aynı)
         Dogrula.esit(0.0, IdamKurali.yukseklik(0), "geri sayımda yerde");
         Dogrula.esit(0.0, IdamKurali.yukseklik(99), "geri sayım bitmeden yerde");
-        Dogrula.esit(0.5, IdamKurali.yukseklik(110), "kaldırılırken yarı yolda");
-        Dogrula.esit(1.0, IdamKurali.yukseklik(130), "1 blok kaldırılmış");
-        Dogrula.esit(0f, IdamKurali.salinim(119), "kaldırılırken sallanmaz");
-        Dogrula.dogru(Math.abs(IdamKurali.salinim(125)) <= 8f && IdamKurali.salinim(125) != 0f, "asılıyken en fazla 8 derece sallanır");
-        Dogrula.esit(160, IdamKurali.SAHNE_SON, "sahne 8 saniye");
+        Dogrula.esit(170, IdamKurali.SAHNE_SON, "sahne 8,5 saniye (asılı kalma 3,5 sn)");
         // Gıyabi idam: op'un başının üstündeki darağacı çiti (dy: ayaktan yukarı blok)
         Dogrula.esit(4, IdamKurali.ustteCit(dy -> dy == 4, dy -> dy < 4, 6), "4 blok yukarıdaki çit bulunur");
         Dogrula.esit(-1, IdamKurali.ustteCit(dy -> false, dy -> true, 6), "üstte çit yok");
@@ -36,5 +32,14 @@ public class IdamTest {
         Dogrula.esit(-1, IdamKurali.ustteCit(dy -> dy == 8, dy -> true, 6), "çok yukarıdaki sayılmaz");
         Dogrula.esit("Efe", IdamKurali.testHedefi(new String[]{"test"}, "Efe"), "isim yazılmazsa kendi görünümü");
         Dogrula.esit("Ahmet", IdamKurali.testHedefi(new String[]{"test", "Ahmet"}, "Efe"), "yazılan oyuncunun görünümü");
+        // Asılma: geri sayım bitince ip bir anda çeker (yavaş yükselme değil), ayaklar yerden kesilir, sönümlü sallanır
+        Dogrula.dogru(IdamKurali.yukseklik(102) > 1.25, "3 tick içinde çekilip biraz fırlar");
+        Dogrula.esit(IdamKurali.ASILI_YUKSEKLIK, IdamKurali.yukseklik(130), "asılı kalır (ayaklar yerden 1,25 blok)");
+        Dogrula.dogru(IdamKurali.yukseklik(101) > 0.4, "çekilme hızlı (ilk tick'lerde)");
+        Dogrula.esit(0f, IdamKurali.salinim(100), "çekildiği an sallanma başlamaz");
+        Dogrula.dogru(Math.abs(IdamKurali.salinim(110)) > Math.abs(IdamKurali.salinim(150)) || Math.abs(IdamKurali.salinim(150)) < 3f,
+                "sallanma giderek azalır");
+        Dogrula.dogru(Math.abs(IdamKurali.salinimKayma(112)) <= 0.15 && IdamKurali.salinimKayma(99) == 0,
+                "gövde de sarkaç gibi hafif kayar (en fazla 0,15 blok)");
     }
 }

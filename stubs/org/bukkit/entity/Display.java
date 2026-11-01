@@ -1,1 +1,1 @@
-package org.bukkit.entity; public interface Display extends Entity { enum Billboard { FIXED, VERTICAL, HORIZONTAL, CENTER } void setBillboard(Billboard b);  void setGlowColorOverride(org.bukkit.Color c); void setViewRange(float r); }
+package org.bukkit.entity; public interface Display extends Entity { enum Billboard { FIXED, VERTICAL, HORIZONTAL, CENTER } void setBillboard(Billboard b);  void setGlowColorOverride(org.bukkit.Color c); void setViewRange(float r); void setTransformation(org.bukkit.util.Transformation t); void setTeleportDuration(int d); }

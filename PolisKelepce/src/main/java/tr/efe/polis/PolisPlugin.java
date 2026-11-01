@@ -100,6 +100,7 @@ public final class PolisPlugin extends JavaPlugin {
             }
         }
         getServer().getScheduler().runTaskTimer(this, gozalti::tik, 5L, 5L);
+        getServer().getScheduler().runTaskTimer(this, gozalti::surukle, 1L, 1L);
         // Tab'daki "(borçlu 3g)" süreleri dakikada bir güncellensin
         getServer().getScheduler().runTaskTimer(this, () -> {
             for (org.bukkit.entity.Player p : Bukkit.getOnlinePlayers()) gozalti.sekmeIsmi(p);

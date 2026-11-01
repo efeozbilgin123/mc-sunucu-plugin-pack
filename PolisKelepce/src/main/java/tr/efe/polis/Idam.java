@@ -57,6 +57,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         String mahkumIsim;
         Location taban;
         float yaw;
+        boolean ucabiliyordu;
         Location cit;
         Chicken ip;
         LeashHitch dugum;
@@ -353,8 +354,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
                 if (!test) Bukkit.broadcast(Component.text(isim + " gıyabında idam edildi.", NamedTextColor.GRAY));
                 return;
             }
-            Location yer = taban.clone().add(0, IdamKurali.yukseklik(t), 0);
-            yer.setYaw(yaw + IdamKurali.salinim(t));
+            Location yer = asiliYer(taban, yaw, t);
             yer.setPitch(t >= 100 ? 20f : 0f);
             manken.teleport(yer);
             tavuk.teleport(yer.clone().add(0, 1.45, 0));
@@ -503,6 +503,8 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         sh.taban.setYaw(sh.yaw);
         sh.onay = onaylar.get(mahkum.getUniqueId());
         plugin.gozalti().sabitle(mahkum, sh.taban);
+        sh.ucabiliyordu = mahkum.getAllowFlight();
+        mahkum.setAllowFlight(true); // asılıyken "havada uçuyor" diye atılmasın
         mahkum.teleport(sh.taban);
 
         // Çitten boyna ip: görünmez yaratık + kayış düğümü
@@ -532,8 +534,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
             return;
         }
         int t = sh.tick++;
-        Location yer = sh.taban.clone().add(0, IdamKurali.yukseklik(t), 0);
-        yer.setYaw(sh.yaw + IdamKurali.salinim(t));
+        Location yer = asiliYer(sh.taban, sh.yaw, t);
         yer.setPitch(t >= 100 ? 20f : 0f);
         mahkum.teleport(yer);
         if (sh.ip != null) sh.ip.teleport(yer.clone().add(0, 1.45, 0));
@@ -586,7 +587,19 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         }
     }
 
+    /** Sahnede gövdenin yeri: ip çekince yükselir, sarkaç gibi yana kayar ve döner. */
+    private static Location asiliYer(Location taban, float yaw, int t) {
+        double r = Math.toRadians(yaw);
+        double kayma = IdamKurali.salinimKayma(t);
+        Location yer = taban.clone().add(Math.cos(r) * kayma, IdamKurali.yukseklik(t), Math.sin(r) * kayma);
+        yer.setYaw(yaw + IdamKurali.salinim(t));
+        return yer;
+    }
+
     private void temizle(Sahne sh) {
+        Player m = Bukkit.getPlayer(sh.mahkum);
+        if (m != null && !sh.ucabiliyordu && m.getGameMode() != org.bukkit.GameMode.CREATIVE
+                && m.getGameMode() != org.bukkit.GameMode.SPECTATOR) m.setAllowFlight(false);
         if (sh.gorev != null) sh.gorev.cancel();
         if (sh.ip != null) {
             sh.ip.setLeashHolder(null); // kayış yere düşmesin

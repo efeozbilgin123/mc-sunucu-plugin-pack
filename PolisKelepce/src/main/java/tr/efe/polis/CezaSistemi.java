@@ -409,6 +409,17 @@ public final class CezaSistemi implements Listener, CommandExecutor, TabComplete
     }
 
     /** Tab listesi için kısa: "3g", "5sa", "12dk" */
+    /**
+     * Tab listesinde ismin yanına: son ödemeye kalan süre (ya da gecikti). kalanMs = -1: süresiz.
+     * Yazılalı kaç dakika olduğu gösterilmez; 1 dakikadan az kaldıysa "1dk".
+     */
+    public static String sekmeEki(boolean vergi, boolean gec, long kalanMs) {
+        if (gec) return vergi ? " (vergi gecikti)" : " (borçlu: GECİKTİ)";
+        String on = vergi ? " (vergi" : " (borçlu";
+        if (kalanMs < 0) return on + ")";
+        return on + ": " + kisaSure(Math.max(60_000L, kalanMs)) + " kaldı)";
+    }
+
     static String kisaSure(long ms) {
         long dk = Math.max(0, ms) / 60_000L;
         if (dk >= 1440) return (dk / 1440) + "g";

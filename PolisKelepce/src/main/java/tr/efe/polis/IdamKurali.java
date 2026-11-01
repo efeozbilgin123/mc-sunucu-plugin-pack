@@ -33,17 +33,36 @@ public final class IdamKurali {
         return null;
     }
 
-    /** Sahne: 0-99 geri sayım, 100-119 kaldırılma, 120-159 sallanma, 160'ta son. */
-    public static final int SAHNE_SON = 160;
+    /**
+     * Sahne: 0-99 geri sayım (ayakta), 100'de ip bir anda çeker (3 tick, biraz fırlar, sonra oturur),
+     * sonra asılı halde sönümlü sallanma; SAHNE_SON'da biter.
+     */
+    public static final int SAHNE_SON = 170;
+    /** Asılıyken ayakların yerden yüksekliği (blok): çitin altında 3 blok boşlukta boyun çite dayanır. */
+    public static final double ASILI_YUKSEKLIK = 1.25;
 
-    /** Tick'e göre yerden yükseklik (blok): geri sayımda 0, sonra 20 tick'te 1 bloğa çıkar. */
+    /** Tick'e göre yerden yükseklik. */
     public static double yukseklik(int t) {
-        return t < 100 ? 0 : Math.min(1.0, (t - 100) * 0.05);
+        if (t < 100) return 0;
+        int d = t - 100;
+        double tepe = ASILI_YUKSEKLIK + 0.1;
+        if (d <= 2) return tepe * (d + 1) / 3.0;           // hızlı çekiş
+        if (d < 8) return tepe - 0.1 * (d - 2) / 6.0;      // ipin esnemesi: hafifçe geri oturur
+        return ASILI_YUKSEKLIK;
     }
 
-    /** Asılıyken sağa sola dönme (derece); kaldırılma bitene kadar 0. */
+    /** Asılıyken gövdenin dönmesi (derece): çekildiği an 0, sonra azalarak sallanır. */
     public static float salinim(int t) {
-        return t < 120 ? 0f : (float) (8 * Math.sin(t * 0.3));
+        if (t <= 100) return 0f;
+        double d = t - 100;
+        return (float) (14 * Math.exp(-d / 45.0) * Math.sin(d * 0.22));
+    }
+
+    /** Sarkaç gibi yana kayma (blok, bakış yönüne dik): en fazla 0,15. */
+    public static double salinimKayma(int t) {
+        if (t <= 100) return 0;
+        double d = t - 100;
+        return 0.15 * Math.exp(-d / 50.0) * Math.sin(d * 0.22 + Math.PI / 2) * Math.min(1.0, d / 4.0);
     }
 
     /**
