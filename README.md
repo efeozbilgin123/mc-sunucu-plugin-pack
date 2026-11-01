@@ -26,3 +26,7 @@ bash testler/calistir.sh
 bash testler/yedek_test.sh
 bash testler/guncelle_test.sh
 ```
+
+## Lisans
+
+GNU GPL v3. Ayrıntı: `LICENSE`
