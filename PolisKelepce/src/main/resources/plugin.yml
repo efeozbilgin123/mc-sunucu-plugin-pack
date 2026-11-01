@@ -1,5 +1,5 @@
 name: PolisKelepce
-version: 1.10.6
+version: 1.10.7
 main: tr.efe.polis.PolisPlugin
 api-version: '1.21'
 author: Efe

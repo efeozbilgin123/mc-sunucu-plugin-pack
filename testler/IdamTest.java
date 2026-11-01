@@ -41,5 +41,14 @@ public class IdamTest {
                 "sallanma giderek azalır");
         Dogrula.dogru(Math.abs(IdamKurali.salinimKayma(112)) <= 0.15 && IdamKurali.salinimKayma(99) == 0,
                 "gövde de sarkaç gibi hafif kayar (en fazla 0,15 blok)");
+        // Asılıyken kamera serbest: yalnızca çekiliş anında ya da yerinden oynatılınca ışınlanır
+        Dogrula.dogru(IdamKurali.isinlaGerekli(0, 0), "sahne başında yerine konur");
+        Dogrula.dogru(IdamKurali.isinlaGerekli(103, 0), "ip çekilirken ışınlanarak yükselir");
+        Dogrula.dogru(!IdamKurali.isinlaGerekli(50, 0.1), "beklerken her tick ışınlanmaz (bakış kilitlenmesin)");
+        Dogrula.dogru(!IdamKurali.isinlaGerekli(130, 0.2), "sallanırken her tick ışınlanmaz");
+        Dogrula.dogru(IdamKurali.isinlaGerekli(130, 0.5), "itilip yerinden oynarsa geri konur");
+        double top = 0;
+        for (int t = 100; t < 140; t++) top += IdamKurali.kaymaHizi(t);
+        Dogrula.dogru(Math.abs(top - (IdamKurali.salinimKayma(140) - IdamKurali.salinimKayma(100))) < 1e-9, "hızların toplamı sarkaç kaymasını verir");
     }
 }

@@ -20,15 +20,4 @@ public final class KelepceKurali {
         return mesafe > isinlamaMesafesi || takiliTik >= TAKILMA_TIK;
     }
 
-    /** Bilek halkasının vücut merkezinden yatay ofseti {dx, dz}; yaw = gövde yönü (Minecraft: 0 = güney). */
-    public static double[] bilekOfseti(float yaw, boolean sag) {
-        double r = Math.toRadians(yaw);
-        double isaret = sag ? -1 : 1;
-        return new double[] { isaret * Math.cos(r) * 0.35, isaret * Math.sin(r) * 0.35 };
-    }
-
-    /** Ayaktan bilek yüksekliği (eğilince gövde alçalır). */
-    public static double bilekYuksekligi(boolean egiliyor) {
-        return egiliyor ? 0.6 : 0.8;
-    }
 }

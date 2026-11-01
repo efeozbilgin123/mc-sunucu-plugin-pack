@@ -81,4 +81,20 @@ public final class IdamKurali {
     public static String testHedefi(String[] args, String kendiIsim) {
         return args.length > 1 && !args[1].isBlank() ? args[1] : kendiIsim;
     }
+
+    /** Çekiliş sırasında (yükseklik değişirken) bu tick'e kadar. */
+    public static final int CEKILIS_SON = 108;
+
+    /**
+     * Asılı oyuncuyu bu tick ışınlamak gerekiyor mu? Her tick ışınlamak kamerayı kilitler;
+     * bu yüzden yalnızca başta, ip çekilirken ya da 0.3 bloktan fazla yerinden oynadıysa.
+     */
+    public static boolean isinlaGerekli(int t, double sapma) {
+        return t == 0 || (t >= 100 && t <= CEKILIS_SON) || sapma > 0.3;
+    }
+
+    /** Sarkaç kaymasının bu tick'teki değişimi (hız olarak verilir, kamerayı etkilemez). */
+    public static double kaymaHizi(int t) {
+        return salinimKayma(t + 1) - salinimKayma(t);
+    }
 }

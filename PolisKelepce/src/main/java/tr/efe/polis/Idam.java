@@ -58,6 +58,7 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         Location taban;
         float yaw;
         boolean ucabiliyordu;
+        float ucusHizi;
         Location cit;
         Chicken ip;
         LeashHitch dugum;
@@ -375,9 +376,24 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
     }
 
     /** Gıyabında idam edilen geri geldi: giriş yapınca (AuthMe) ölür. */
+    /** Asılıyken çift boşlukla uçuşu kapatıp düşmesin. */
+    @org.bukkit.event.EventHandler
+    public void onUcus(org.bukkit.event.player.PlayerToggleFlightEvent e) {
+        Sahne sh = sahneler.get(e.getPlayer().getUniqueId());
+        if (!e.isFlying() && sh != null && sh.tick > 100) e.setCancelled(true);
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onGeldi(org.bukkit.event.player.PlayerJoinEvent e) {
         Player p = e.getPlayer();
+        // Asılıyken sunucu çöktüyse uçuş hızı 0 kalmış olabilir: düzelt
+        if (p.getFlySpeed() == 0f) {
+            p.setFlySpeed(0.1f);
+            if (p.getGameMode() == org.bukkit.GameMode.SURVIVAL || p.getGameMode() == org.bukkit.GameMode.ADVENTURE) {
+                p.setFlying(false);
+                p.setAllowFlight(false);
+            }
+        }
         if (!giyabi.containsKey(p.getUniqueId())) return;
         int[] sayac = {0};
         Bukkit.getScheduler().runTaskTimer(plugin, gorev -> {
@@ -504,7 +520,11 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         sh.onay = onaylar.get(mahkum.getUniqueId());
         plugin.gozalti().sabitle(mahkum, sh.taban);
         sh.ucabiliyordu = mahkum.getAllowFlight();
-        mahkum.setAllowFlight(true); // asılıyken "havada uçuyor" diye atılmasın
+        sh.ucusHizi = mahkum.getFlySpeed();
+        // Uçuş hızı 0 ile havada asılı tutulur: yerçekimi yok, kımıldayamaz ama etrafına bakabilir.
+        // (Her tick ışınlamak kamerayı tek yöne kilitliyordu.)
+        mahkum.setAllowFlight(true);
+        mahkum.setFlySpeed(0f);
         mahkum.teleport(sh.taban);
 
         // Çitten boyna ip: görünmez yaratık + kayış düğümü
@@ -535,8 +555,19 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
         }
         int t = sh.tick++;
         Location yer = asiliYer(sh.taban, sh.yaw, t);
-        yer.setPitch(t >= 100 ? 20f : 0f);
-        mahkum.teleport(yer);
+        Location simdi = mahkum.getLocation();
+        double sapma = simdi.getWorld().equals(yer.getWorld()) ? simdi.distance(yer) : 99;
+        if (IdamKurali.isinlaGerekli(t, sapma)) {
+            // Bakış yönü oyuncuda kalsın
+            yer.setYaw(simdi.getYaw());
+            yer.setPitch(simdi.getPitch());
+            mahkum.teleport(yer);
+            if (t >= 100 && !mahkum.isFlying()) mahkum.setFlying(true); // yerden kesildi: havada asılı kalsın
+        } else {
+            // Sarkaç: hızla it (hız paketi kameraya dokunmaz)
+            double r = Math.toRadians(sh.yaw), v = IdamKurali.kaymaHizi(t);
+            mahkum.setVelocity(new org.bukkit.util.Vector(Math.cos(r) * v, 0, Math.sin(r) * v));
+        }
         if (sh.ip != null) sh.ip.teleport(yer.clone().add(0, 1.45, 0));
         if (sh.dugum == null && t % 2 == 0) ipCiz(sh.cit.clone().add(0.5, 0.5, 0.5), yer.clone().add(0, 1.45, 0));
 
@@ -598,8 +629,14 @@ public final class Idam implements Listener, CommandExecutor, TabCompleter {
 
     private void temizle(Sahne sh) {
         Player m = Bukkit.getPlayer(sh.mahkum);
-        if (m != null && !sh.ucabiliyordu && m.getGameMode() != org.bukkit.GameMode.CREATIVE
-                && m.getGameMode() != org.bukkit.GameMode.SPECTATOR) m.setAllowFlight(false);
+        if (m != null) {
+            m.setFlySpeed(sh.ucusHizi > 0 ? sh.ucusHizi : 0.1f);
+            if (!sh.ucabiliyordu && m.getGameMode() != org.bukkit.GameMode.CREATIVE
+                    && m.getGameMode() != org.bukkit.GameMode.SPECTATOR) {
+                m.setFlying(false);
+                m.setAllowFlight(false);
+            }
+        }
         if (sh.gorev != null) sh.gorev.cancel();
         if (sh.ip != null) {
             sh.ip.setLeashHolder(null); // kayış yere düşmesin

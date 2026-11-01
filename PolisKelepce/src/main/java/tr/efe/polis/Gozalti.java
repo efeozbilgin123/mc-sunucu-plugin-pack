@@ -443,7 +443,7 @@ public final class Gozalti implements Listener, CommandExecutor, TabCompleter {
         sonHucre.remove(hedef.getUniqueId());
         kaydet();
         etkileriSil(hedef);
-        bilekleriKaldir(hedef.getUniqueId());
+        elleriGeriGoster(hedef);
     }
 
     private void kelepceCikar(Player hedef, String neden) {
@@ -451,7 +451,7 @@ public final class Gozalti implements Listener, CommandExecutor, TabCompleter {
         sonHucre.remove(hedef.getUniqueId());
         kaydet(); // çökme olursa kelepçe geri gelmesin
         etkileriSil(hedef);
-        bilekleriKaldir(hedef.getUniqueId());
+        elleriGeriGoster(hedef);
         if (plugin.getConfig().getBoolean("gorsel.kelepce-efekt", true)) {
             hedef.getWorld().playSound(hedef.getLocation(), Sound.BLOCK_IRON_TRAPDOOR_CLOSE, 1f, 1.6f);
         }
@@ -461,63 +461,24 @@ public final class Gozalti implements Listener, CommandExecutor, TabCompleter {
 
     // ------------------------------------------------------------------
     // Animasyon (resource pack gerektirmez)
-    // - Bileklerde demir kelepçe halkaları (blok görüntüsü; Java'da görünür)
+    // - Eller önde birleşik: diğer Java oyuncularına elinde dolu arbalet varmış gibi gösterilir
+    //   (dolu arbalet iki kolu öne birleştirir) ama arbaletin görüntüsü demir zincire çevrilir
     // - Bileklerde demir parıltısı (Bedrock'ta da görünür), götürülürken polisle arasında zincir çizgisi
     // ------------------------------------------------------------------
 
-    /** Kelepçelinin iki bileğindeki halka görüntüleri: [sağ, sol]. */
-    private final Map<UUID, org.bukkit.entity.BlockDisplay[]> bilekler = new HashMap<>();
+    private ItemStack kelepceGorunumu;
 
-    private void bilekleriGuncelle(Player h) {
-        if (!animasyonAcik()) { bilekleriKaldir(h.getUniqueId()); return; }
-        org.bukkit.entity.BlockDisplay[] d = bilekler.get(h.getUniqueId());
-        if (d != null && (!d[0].isValid() || !d[1].isValid() || !d[0].getWorld().equals(h.getWorld())
-                || d[0].getLocation().distanceSquared(h.getLocation()) > 9)) { // ışınlandıysa havada süzülmesin, yeniden oluştur
-            bilekleriKaldir(h.getUniqueId());
-            d = null;
+    private ItemStack kelepceGorunumu() {
+        if (kelepceGorunumu == null) {
+            ItemStack is = new ItemStack(org.bukkit.Material.CROSSBOW);
+            if (is.getItemMeta() instanceof org.bukkit.inventory.meta.CrossbowMeta cm) {
+                cm.addChargedProjectile(new ItemStack(org.bukkit.Material.ARROW));
+                cm.setItemModel(org.bukkit.Material.IRON_CHAIN.getKey()); // arbalet değil zincir görünsün
+                is.setItemMeta(cm);
+            }
+            kelepceGorunumu = is;
         }
-        float yaw = h.getBodyYaw();
-        Location ayak = h.getLocation();
-        double y = KelepceKurali.bilekYuksekligi(h.isSneaking());
-        if (d == null) {
-            d = new org.bukkit.entity.BlockDisplay[] { halkaOlustur(h, bilekYeri(ayak, yaw, y, true)),
-                    halkaOlustur(h, bilekYeri(ayak, yaw, y, false)) };
-            bilekler.put(h.getUniqueId(), d);
-            return;
-        }
-        d[0].teleport(bilekYeri(ayak, yaw, y, true));
-        d[1].teleport(bilekYeri(ayak, yaw, y, false));
-    }
-
-    private static Location bilekYeri(Location ayak, float yaw, double y, boolean sag) {
-        double[] o = KelepceKurali.bilekOfseti(yaw, sag);
-        Location l = ayak.clone().add(o[0], y, o[1]);
-        l.setYaw(yaw);
-        l.setPitch(0);
-        return l;
-    }
-
-    private org.bukkit.entity.BlockDisplay halkaOlustur(Player h, Location yer) {
-        org.bukkit.entity.BlockDisplay d = yer.getWorld().spawn(yer, org.bukkit.entity.BlockDisplay.class, bd -> {
-            bd.setBlock(org.bukkit.Material.IRON_BLOCK.createBlockData());
-            bd.setPersistent(false);
-            // Kolu saran ince demir bant (kol 0.25 blok; bant biraz daha geniş), merkezde
-            bd.setTransformation(new org.bukkit.util.Transformation(
-                    new org.joml.Vector3f(-0.15f, -0.05f, -0.15f), new org.joml.AxisAngle4f(),
-                    new org.joml.Vector3f(0.3f, 0.1f, 0.3f), new org.joml.AxisAngle4f()));
-            // Başka oyuncuların ekranında oyuncu modeli ~3 tick geriden gelir; halka da aynı hızda kaysın
-            bd.setTeleportDuration(3);
-            bd.setViewRange(0.5f);
-        });
-        // Kendi ekranında (F5) gecikmeli kayan halka görmesin
-        h.hideEntity(plugin, d);
-        return d;
-    }
-
-    private void bilekleriKaldir(UUID id) {
-        org.bukkit.entity.BlockDisplay[] d = bilekler.remove(id);
-        if (d == null) return;
-        for (org.bukkit.entity.BlockDisplay x : d) if (x != null) x.remove();
+        return kelepceGorunumu;
     }
 
     private boolean animasyonAcik() {
@@ -528,13 +489,19 @@ public final class Gozalti implements Listener, CommandExecutor, TabCompleter {
         if (!animasyonAcik()) return;
         World w = h.getWorld();
         Location ayak = h.getLocation();
-        // Bileklerde küçük demir parıltısı (Bedrock'ta blok görüntüsü olmayabilir; parçacık her yerde görünür)
-        float yaw = h.getBodyYaw();
-        double by = KelepceKurali.bilekYuksekligi(h.isSneaking());
-        Particle.DustOptions demir = new Particle.DustOptions(Color.fromRGB(0xB0B0B0), 0.6f);
-        w.spawnParticle(Particle.DUST, bilekYeri(ayak, yaw, by, true), 1, 0.04, 0.03, 0.04, 0, demir);
-        w.spawnParticle(Particle.DUST, bilekYeri(ayak, yaw, by, false), 1, 0.04, 0.03, 0.04, 0, demir);
-        Location bilek = ayak.clone().add(0, by, 0);
+        // Elleri önde: yakındaki Java oyuncularına sahte el eşyası (Bedrock'ta arbalet görünürdü, ona gönderilmez)
+        for (Player izleyen : w.getPlayers()) {
+            if (izleyen.equals(h) || Kayitlar.bedrockMu(izleyen.getUniqueId())
+                    || izleyen.getLocation().distanceSquared(ayak) > 48 * 48) continue;
+            izleyen.sendEquipmentChange(h, EquipmentSlot.HAND, kelepceGorunumu());
+            izleyen.sendEquipmentChange(h, EquipmentSlot.OFF_HAND, new ItemStack(org.bukkit.Material.AIR));
+        }
+        // Önde birleşen bileklerde küçük demir parıltısı
+        org.bukkit.util.Vector bak = ayak.getDirection().setY(0);
+        if (bak.lengthSquared() > 0) bak.normalize();
+        Location bilek = ayak.clone().add(bak.multiply(0.45)).add(0, h.isSneaking() ? 1.05 : 1.3, 0);
+        w.spawnParticle(Particle.DUST, bilek, 2, 0.08, 0.04, 0.08, 0,
+                new Particle.DustOptions(Color.fromRGB(0xB0B0B0), 0.6f));
         // Götürülürken zincir çizgisi
         if (k.surukleniyor()) {
             Player polis = Bukkit.getPlayer(k.polis());
@@ -552,6 +519,15 @@ public final class Gozalti implements Listener, CommandExecutor, TabCompleter {
                     }
                 }
             }
+        }
+    }
+
+    /** Kelepçe açılınca herkese gerçek el eşyalarını tekrar göster. */
+    private void elleriGeriGoster(Player h) {
+        for (Player izleyen : h.getWorld().getPlayers()) {
+            if (izleyen.equals(h)) continue;
+            izleyen.sendEquipmentChange(h, EquipmentSlot.HAND, h.getInventory().getItemInMainHand());
+            izleyen.sendEquipmentChange(h, EquipmentSlot.OFF_HAND, h.getInventory().getItemInOffHand());
         }
     }
 
@@ -883,7 +859,6 @@ public final class Gozalti implements Listener, CommandExecutor, TabCompleter {
     public void onQuit(PlayerQuitEvent e) {
         Player p = e.getPlayer();
         rolYetkileri.remove(p.getUniqueId());
-        bilekleriKaldir(p.getUniqueId());
         Kelepce cikan = kelepceliler.remove(p.getUniqueId());
         if (cikan != null) {
             cevrimdisiKelepceli.put(p.getUniqueId(), cikan.id());
@@ -974,7 +949,6 @@ public final class Gozalti implements Listener, CommandExecutor, TabCompleter {
                 // normalde onQuit halleder; yine de kaybolmasın
                 cevrimdisiKelepceli.put(giris.getKey(), giris.getValue().id());
                 cevrimdisiPolis.put(giris.getKey(), giris.getValue().polis());
-                bilekleriKaldir(giris.getKey());
                 it.remove();
                 continue;
             }
@@ -985,7 +959,7 @@ public final class Gozalti implements Listener, CommandExecutor, TabCompleter {
     }
 
     // ------------------------------------------------------------------
-    // Her tick: bilek halkaları ve sürükleme
+    // Her tick: sürükleme
     // Sürükleme ışınlama yerine hızla (velocity) yapılır: istemci hareketi kendisi
     // yumuşatır, başkalarına "pingli/takılıyor" gibi görünmez. Köşeye takılırsa
     // ya da çok uzaklaşırsa son çare olarak polisin izine ışınlanır.
@@ -998,19 +972,12 @@ public final class Gozalti implements Listener, CommandExecutor, TabCompleter {
         double cekme = plugin.getConfig().getDouble("cekme-mesafesi", 3.0);
         double isinla = plugin.getConfig().getDouble("isinlama-mesafesi", 16.0);
         izKaydet();
-        bilekler.keySet().removeIf(id -> {
-            if (kelepceliler.containsKey(id)) return false;
-            org.bukkit.entity.BlockDisplay[] d = bilekler.get(id);
-            for (org.bukkit.entity.BlockDisplay x : d) if (x != null) x.remove();
-            return true;
-        });
         oncekiYer.keySet().retainAll(kelepceliler.keySet());
         takili.keySet().retainAll(kelepceliler.keySet());
 
         for (Map.Entry<UUID, Kelepce> giris : kelepceliler.entrySet()) {
             Player h = Bukkit.getPlayer(giris.getKey());
             if (h == null) continue;
-            bilekleriGuncelle(h);
             Kelepce k = giris.getValue();
             UUID id = h.getUniqueId();
             Location hl = h.getLocation();
@@ -1612,7 +1579,6 @@ public final class Gozalti implements Listener, CommandExecutor, TabCompleter {
 
     /** Plugin kapanırken kelepçelileri kaydet, etkileri kaldır. */
     public void kapat() {
-        for (UUID id : new java.util.ArrayList<>(bilekler.keySet())) bilekleriKaldir(id);
         for (Map.Entry<UUID, Kelepce> g : kelepceliler.entrySet()) {
             cevrimdisiKelepceli.put(g.getKey(), g.getValue().id());
             cevrimdisiPolis.put(g.getKey(), g.getValue().polis());
